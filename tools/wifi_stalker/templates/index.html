@@ -4,13 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wi-Fi Stalker - Device Tracking Dashboard</title>
+    <link rel="icon" type="image/jpeg" href="/static/images/favicon16x16.jpg">
     <link rel="stylesheet" href="/stalker/static/css/styles.css">
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function() {
+            const savedTheme = localStorage.getItem('unifi-toolkit-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
     <div x-data="dashboard()" x-init="init()" class="container">
         <!-- Header -->
         <header>
+            <div class="header-top">
+                <a href="/" class="back-to-dashboard">
+                    ← Back to Dashboard
+                </a>
+            </div>
             <h1>📡 Wi-Fi Stalker</h1>
             <p class="subtitle">Track Wi-Fi clients through UniFi infrastructure</p>
             <div class="status-bar">
@@ -211,9 +224,9 @@
                             <small>For UCG/UDM: https://192.168.x.x (no port needed)</small>
                         </div>
 
-                        <div style="margin: 1.5rem 0; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
+                        <div class="auth-info-box">
                             <strong>Authentication Method:</strong>
-                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">
+                            <p>
                                 🔐 <strong>UniFi OS (UCG, UDM):</strong> Use API Key<br>
                                 🔑 <strong>Legacy Controllers:</strong> Use Username & Password
                             </p>
@@ -277,14 +290,14 @@
                     </form>
 
                     <!-- Webhooks Section -->
-                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e0e0e0;">
-                        <h3 style="margin-bottom: 1rem;">Webhooks</h3>
-                        <p class="subtitle" style="margin-bottom: 1rem;">
+                    <div class="webhooks-section">
+                        <h3>Webhooks</h3>
+                        <p class="subtitle">
                             Configure webhooks to receive notifications when devices connect, disconnect, or roam.
                         </p>
 
                         <!-- Add Webhook Button -->
-                        <button @click="showAddWebhook = true" class="btn btn-primary" style="margin-bottom: 1rem;">
+                        <button @click="showAddWebhook = true" class="btn btn-primary webhook-add-btn">
                             + Add Webhook
                         </button>
 
@@ -293,22 +306,22 @@
                             No webhooks configured. Click "Add Webhook" to create one.
                         </div>
 
-                        <div x-show="webhooks.length > 0" style="margin-top: 1rem;">
+                        <div x-show="webhooks.length > 0" class="webhooks-list">
                             <template x-for="webhook in webhooks" :key="webhook.id">
-                                <div class="webhook-item" style="padding: 1rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem; background: #f9f9f9;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div style="flex: 1;">
+                                <div class="webhook-item">
+                                    <div class="webhook-item-content">
+                                        <div class="webhook-item-info">
                                             <strong x-text="webhook.name"></strong>
-                                            <span class="badge" x-text="webhook.webhook_type" style="margin-left: 0.5rem;"></span>
-                                            <span x-show="!webhook.enabled" class="badge" style="background: #ccc; margin-left: 0.5rem;">Disabled</span>
-                                            <div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">
+                                            <span class="badge webhook-type-badge" x-text="webhook.webhook_type"></span>
+                                            <span x-show="!webhook.enabled" class="badge webhook-disabled-badge">Disabled</span>
+                                            <div class="webhook-events">
                                                 Events:
                                                 <span x-show="webhook.event_device_connected">Connected</span>
                                                 <span x-show="webhook.event_device_disconnected">Disconnected</span>
                                                 <span x-show="webhook.event_device_roamed">Roamed</span>
                                             </div>
                                         </div>
-                                        <div>
+                                        <div class="webhook-item-actions">
                                             <button @click="testWebhook(webhook.id)" class="btn btn-sm btn-secondary">Test</button>
                                             <button @click="editWebhook(webhook)" class="btn btn-sm btn-secondary">Edit</button>
                                             <button @click="deleteWebhook(webhook.id)" class="btn btn-sm btn-danger">Delete</button>
@@ -363,15 +376,15 @@
                         <div class="form-group">
                             <label>Trigger Events</label>
                             <div>
-                                <label style="display: block; margin-bottom: 0.5rem;">
+                                <label class="checkbox-label">
                                     <input type="checkbox" x-model="webhookForm.event_device_connected">
                                     Device Connected
                                 </label>
-                                <label style="display: block; margin-bottom: 0.5rem;">
+                                <label class="checkbox-label">
                                     <input type="checkbox" x-model="webhookForm.event_device_disconnected">
                                     Device Disconnected
                                 </label>
-                                <label style="display: block; margin-bottom: 0.5rem;">
+                                <label class="checkbox-label">
                                     <input type="checkbox" x-model="webhookForm.event_device_roamed">
                                     Device Roamed
                                 </label>
@@ -406,16 +419,16 @@
                     <button @click="showGetDevices = false" class="close-btn">×</button>
                 </div>
                 <div class="modal-body">
-                    <p class="subtitle" style="margin-bottom: 1rem;">
+                    <p class="subtitle modal-subtitle">
                         Select devices to track. Already-tracked devices are pre-checked.
                     </p>
 
                     <!-- Search Filter -->
-                    <div x-show="unifiClients.length > 0" style="margin-bottom: 1rem;">
+                    <div x-show="unifiClients.length > 0" class="modal-search">
                         <input type="text"
                                x-model="unifiClientSearch"
                                placeholder="Search by name, MAC address, or IP..."
-                               style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                               class="search-input">
                     </div>
 
                     <div x-show="unifiClients.length === 0" class="empty-state">
@@ -453,7 +466,7 @@
                         </template>
                     </div>
 
-                    <div class="form-actions" style="margin-top: 1.5rem;">
+                    <div class="form-actions modal-actions">
                         <button @click="stalkSelectedDevices()" class="btn btn-primary">
                             <span x-text="'Stalk (' + selectedClients.size + ' selected)'"></span>
                         </button>
@@ -571,7 +584,7 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="form-actions" style="margin-top: 2rem;">
+                    <div class="form-actions modal-actions">
                         <button @click="viewHistory(deviceDetails.id)" class="btn btn-primary">
                             📊 View History
                         </button>
@@ -607,7 +620,7 @@
                         No history available for this device.
                     </div>
                     <div x-show="history.length > 0">
-                        <div style="margin-bottom: 1rem;">
+                        <div class="history-actions">
                             <button @click="exportHistory(currentDevice.id)" class="btn btn-secondary">
                                 📥 Export to CSV
                             </button>

@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="UniFi Toolkit",
     description="Comprehensive toolkit for UniFi network management and monitoring",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan
 )
 
@@ -99,7 +99,7 @@ async def health_check():
     """
     return {
         "status": "healthy",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "tools": {
             "wifi_stalker": "0.6.0"
         }

@@ -4,14 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniFi Toolkit - Dashboard</title>
+    <link rel="icon" type="image/jpeg" href="/static/images/favicon16x16.jpg">
     <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function() {
+            const savedTheme = localStorage.getItem('unifi-toolkit-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🛠️ UniFi Toolkit</h1>
-            <p class="subtitle">Comprehensive toolkit for UniFi network management and monitoring</p>
+            <div class="header-content">
+                <div class="theme-toggle">
+                    <span class="theme-toggle-label" id="theme-label">Light</span>
+                    <button class="theme-toggle-btn" id="theme-toggle" title="Toggle dark/light mode">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                </div>
+                <div class="header-logo">
+                    <img src="/static/images/2022-Crosstalk-Solutions-Logo.png" alt="Crosstalk Solutions">
+                </div>
+                <h1>🛠️ UniFi Toolkit</h1>
+                <p class="subtitle">Comprehensive toolkit for UniFi network management and monitoring</p>
+            </div>
         </header>
 
         <!-- Main Content -->
@@ -116,7 +135,7 @@
         <footer class="footer">
             <p>
                 <a href="https://github.com/Crosstalk-Solutions/unifi-toolkit" target="_blank">UniFi Toolkit</a>
-                v1.0.0 | by
+                v1.1.0 | by
                 <a href="https://www.crosstalksolutions.com" target="_blank">Crosstalk Solutions</a>
             </p>
             <p class="footer-links">
@@ -126,5 +145,38 @@
             </p>
         </footer>
     </div>
+
+    <script>
+        // Theme toggle functionality
+        (function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeLabel = document.getElementById('theme-label');
+
+            function updateThemeUI(theme) {
+                if (theme === 'dark') {
+                    themeIcon.textContent = '☀️';
+                    themeLabel.textContent = 'Dark';
+                } else {
+                    themeIcon.textContent = '🌙';
+                    themeLabel.textContent = 'Light';
+                }
+            }
+
+            // Initialize UI based on current theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeUI(currentTheme);
+
+            // Toggle theme on click
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('unifi-toolkit-theme', newTheme);
+                updateThemeUI(newTheme);
+            });
+        })();
+    </script>
 </body>
 </html>

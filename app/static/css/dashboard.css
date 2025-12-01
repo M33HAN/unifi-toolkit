@@ -1,8 +1,15 @@
 /* UniFi Toolkit - Main Dashboard Styles */
 
 :root {
-    --primary-color: #3b82f6;
-    --secondary-color: #6b7280;
+    /* Crosstalk Solutions Brand Colors */
+    --ct-blue: #2B3990;
+    --ct-orange: #F15A29;
+    --ct-grey: #939598;
+
+    /* Light Mode (default) */
+    --primary-color: #2B3990;
+    --accent-color: #F15A29;
+    --secondary-color: #939598;
     --success-color: #10b981;
     --background: #f9fafb;
     --surface: #ffffff;
@@ -11,6 +18,21 @@
     --border-color: #e5e7eb;
     --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark Mode - applied when data-theme="dark" is set on html element */
+:root[data-theme="dark"] {
+    --primary-color: #4B5FBB;
+    --accent-color: #F15A29;
+    --secondary-color: #939598;
+    --success-color: #10b981;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -155,8 +177,12 @@ body {
 }
 
 .btn-primary:hover {
-    background: #2563eb;
+    background: #1e2d75;
     transform: translateY(-1px);
+}
+
+:root[data-theme="dark"] .btn-primary:hover {
+    background: #5b6fc9;
 }
 
 .btn-disabled {
@@ -233,6 +259,61 @@ body {
     flex-wrap: wrap;
 }
 
+/* Theme Toggle */
+.theme-toggle {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.25rem;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--border-color);
+    transform: scale(1.05);
+}
+
+.theme-toggle-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Header with logo */
+.header-content {
+    position: relative;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.header-logo img {
+    max-height: 60px;
+    max-width: 300px;
+    width: auto;
+    height: auto;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -258,5 +339,15 @@ body {
 
     .info-section {
         grid-template-columns: 1fr;
+    }
+
+    .theme-toggle {
+        position: static;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .header-logo img {
+        height: 45px;
     }
 }
