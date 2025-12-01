@@ -1,0 +1,29 @@
+[project]
+name = "unifi-toolkit"
+version = "1.0.0"
+description = "A suite of tools for UniFi network management"
+authors = [{name = "Crosstalk Solutions"}]
+requires-python = ">=3.9,<3.13"
+license = {text = "MIT"}
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://github.com/Crosstalk-Solutions/unifi-toolkit"
+Documentation = "https://github.com/Crosstalk-Solutions/unifi-toolkit/blob/main/README.md"
+Repository = "https://github.com/Crosstalk-Solutions/unifi-toolkit"
+Issues = "https://github.com/Crosstalk-Solutions/unifi-toolkit/issues"
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

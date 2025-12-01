@@ -1,0 +1,12 @@
+UniFi Toolkit GUI improvements
+
+- Need to add some sort of 'Back to dashboard' button on each tool (ie. Wi-Fi Stalker)
+
+- Crosstalk branding on the dashboard - logo / colors - logo files have been uploaded to /logo, colors are:
+
+Blue:  #2B3990
+Orange:  #F15A29
+Grey:  #939598
+
+- let's add a dark mode / light mode toggle for the entire application.  The toggle should be in the upper right-hand corner of the dashboard header for the UniFi Toolkit, and the selected option should carry through to sub-applications.
+

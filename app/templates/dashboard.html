@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniFi Toolkit - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🛠️ UniFi Toolkit</h1>
+            <p class="subtitle">Comprehensive toolkit for UniFi network management and monitoring</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tools Grid -->
+            <div class="tools-grid">
+                <!-- Wi-Fi Stalker Tool -->
+                <div class="tool-card">
+                    <div class="tool-icon">📡</div>
+                    <h2>Wi-Fi Stalker</h2>
+                    <p class="tool-description">
+                        Track specific Wi-Fi client devices through your UniFi infrastructure.
+                        Monitor connection status, detect roaming between access points, and maintain
+                        historical logs of device movements.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-badge">Device Tracking</span>
+                        <span class="feature-badge">Roaming Detection</span>
+                        <span class="feature-badge">History Logs</span>
+                        <span class="feature-badge">Webhooks</span>
+                    </div>
+                    <div class="tool-actions">
+                        <a href="/stalker/" class="btn btn-primary">Open Wi-Fi Stalker</a>
+                    </div>
+                    <div class="tool-version">v0.6.0</div>
+                </div>
+
+                <!-- Placeholder for future tools -->
+                <div class="tool-card tool-card-coming-soon">
+                    <div class="tool-icon">🛡️</div>
+                    <h2>IDS Monitor</h2>
+                    <p class="tool-description">
+                        Monitor IDS/IPS events, view blocked IPs and threat alerts, and manage
+                        security rules across your UniFi network.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-badge feature-badge-disabled">Coming Soon</span>
+                    </div>
+                    <div class="tool-actions">
+                        <button class="btn btn-disabled" disabled>Coming Soon</button>
+                    </div>
+                </div>
+
+                <div class="tool-card tool-card-coming-soon">
+                    <div class="tool-icon">💡</div>
+                    <h2>Product Recommender</h2>
+                    <p class="tool-description">
+                        AI-powered product recommendations for UniFi equipment based on your
+                        network requirements and use cases.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-badge feature-badge-disabled">Coming Soon</span>
+                    </div>
+                    <div class="tool-actions">
+                        <button class="btn btn-disabled" disabled>Coming Soon</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="info-section">
+                <div class="info-card">
+                    <h3>About UniFi Toolkit</h3>
+                    <p>
+                        UniFi Toolkit is a comprehensive collection of tools designed to enhance
+                        your UniFi network management experience. Each tool is purpose-built to
+                        solve specific networking challenges and provide deep insights into your
+                        infrastructure.
+                    </p>
+                    <p>
+                        All tools share a common UniFi controller configuration, making it easy
+                        to manage multiple capabilities from a single installation.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Getting Started</h3>
+                    <ol>
+                        <li>Select a tool from the grid above</li>
+                        <li>Configure your UniFi controller connection</li>
+                        <li>Start using the tool's features</li>
+                    </ol>
+                    <p>
+                        Each tool has its own configuration and data, but they all leverage
+                        shared infrastructure for authentication and UniFi API access.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>System Requirements</h3>
+                    <ul>
+                        <li>UniFi Network Controller (Cloud Key, UDM, UCG, or standalone)</li>
+                        <li>Python 3.9 - 3.12</li>
+                        <li>Access to UniFi Controller API</li>
+                        <li>Modern web browser with JavaScript enabled</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <a href="https://github.com/Crosstalk-Solutions/unifi-toolkit" target="_blank">UniFi Toolkit</a>
+                v1.0.0 | by
+                <a href="https://www.crosstalksolutions.com" target="_blank">Crosstalk Solutions</a>
+            </p>
+            <p class="footer-links">
+                <a href="/health">Health Check</a> |
+                <a href="https://github.com/Crosstalk-Solutions/unifi-toolkit/issues" target="_blank">Report Issue</a> |
+                <a href="https://github.com/Crosstalk-Solutions/unifi-toolkit#readme" target="_blank">Documentation</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
