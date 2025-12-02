@@ -6,40 +6,40 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
-BOLD='\033[1m'
+# Colors for output (using $'...' to properly interpret escape sequences)
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+CYAN=$'\033[0;36m'
+NC=$'\033[0m' # No Color
+BOLD=$'\033[1m'
 
 # Functions
 print_banner() {
     echo ""
-    echo -e "${BLUE}=================================================================${NC}"
-    echo -e "${BLUE}          ${BOLD}UI Toolkit - Installation Wizard${NC}"
-    echo -e "${BLUE}"
-    echo -e "        Network Management Tools for UniFi"
-    echo -e "${BLUE}=================================================================${NC}"
+    printf "${BLUE}=================================================================${NC}\n"
+    printf "${BLUE}          ${BOLD}UI Toolkit - Installation Wizard${NC}\n"
+    printf "${BLUE}\n"
+    printf "        Network Management Tools for UniFi\n"
+    printf "${BLUE}=================================================================${NC}\n"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    printf "${GREEN}✓${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    printf "${RED}✗${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    printf "${YELLOW}⚠${NC} %s\n" "$1"
 }
 
 print_info() {
-    echo -e "${CYAN}ℹ${NC} $1"
+    printf "${CYAN}ℹ${NC} %s\n" "$1"
 }
 
 # Check if Python 3 is available
@@ -162,7 +162,7 @@ main() {
     print_banner
 
     # Check prerequisites
-    echo -e "${BOLD}Checking prerequisites...${NC}"
+    printf "${BOLD}Checking prerequisites...${NC}\n"
     echo ""
     check_python
     echo ""
@@ -171,16 +171,16 @@ main() {
     check_existing_config
 
     # Step 1: Choose deployment type
-    echo -e "${BOLD}Step 1: Deployment Type${NC}"
+    printf "${BOLD}Step 1: Deployment Type${NC}\n"
     echo ""
     echo "How will you be deploying UI Toolkit?"
     echo ""
-    echo "  1) ${BOLD}Local${NC} - Running on your LAN only"
+    printf "  1) ${BOLD}Local${NC} - Running on your LAN only\n"
     echo "     • No authentication required"
     echo "     • No HTTPS (uses HTTP)"
     echo "     • Access via http://localhost:8000"
     echo ""
-    echo "  2) ${BOLD}Production${NC} - Internet-facing deployment"
+    printf "  2) ${BOLD}Production${NC} - Internet-facing deployment\n"
     echo "     • Authentication required"
     echo "     • HTTPS with Let's Encrypt"
     echo "     • Requires a domain name"
@@ -208,7 +208,7 @@ main() {
     echo ""
 
     # Step 2: Generate encryption key
-    echo -e "${BOLD}Step 2: Generating Encryption Key${NC}"
+    printf "${BOLD}Step 2: Generating Encryption Key${NC}\n"
     echo ""
     print_info "Generating secure encryption key..."
     ENCRYPTION_KEY=$(generate_encryption_key)
@@ -222,19 +222,19 @@ main() {
 
     # Step 3: Production-specific configuration
     if [ "$DEPLOYMENT_TYPE" == "production" ]; then
-        echo -e "${BOLD}Step 3: Production Configuration${NC}"
+        printf "${BOLD}Step 3: Production Configuration${NC}\n"
         echo ""
 
         # Security notice
-        echo -e "${YELLOW}=================================================================${NC}"
-        echo -e "${YELLOW}  ${BOLD}IMPORTANT: Network Security${NC}"
-        echo -e "${YELLOW}=================================================================${NC}"
-        echo -e "${YELLOW}  When managing multiple UniFi sites, always use site-to-site"
-        echo -e "  VPN connections. Never expose UniFi controllers directly to"
-        echo -e "  the internet via port forwarding."
-        echo -e ""
-        echo -e "  Recommended: WireGuard, IPSec, Tailscale, or UniFi VPN${NC}"
-        echo -e "${YELLOW}=================================================================${NC}"
+        printf "${YELLOW}=================================================================${NC}\n"
+        printf "${YELLOW}  ${BOLD}IMPORTANT: Network Security${NC}\n"
+        printf "${YELLOW}=================================================================${NC}\n"
+        printf "${YELLOW}  When managing multiple UniFi sites, always use site-to-site\n"
+        printf "  VPN connections. Never expose UniFi controllers directly to\n"
+        printf "  the internet via port forwarding.\n"
+        printf "\n"
+        printf "  Recommended: WireGuard, IPSec, Tailscale, or UniFi VPN${NC}\n"
+        printf "${YELLOW}=================================================================${NC}\n"
         echo ""
 
         # Domain name
@@ -303,7 +303,7 @@ main() {
         STEP_NUM="3"
     fi
 
-    echo -e "${BOLD}Step $STEP_NUM: Writing Configuration${NC}"
+    printf "${BOLD}Step $STEP_NUM: Writing Configuration${NC}\n"
     echo ""
 
     cat > .env << EOF
@@ -402,46 +402,46 @@ EOF
 
     # Final instructions
     echo ""
-    echo -e "${GREEN}=================================================================${NC}"
-    echo -e "${GREEN}                     Setup Complete!${NC}"
-    echo -e "${GREEN}=================================================================${NC}"
+    printf "${GREEN}=================================================================${NC}\n"
+    printf "${GREEN}                     Setup Complete!${NC}\n"
+    printf "${GREEN}=================================================================${NC}\n"
     echo ""
 
     if [ "$DEPLOYMENT_TYPE" == "production" ]; then
-        echo -e "${BOLD}Next Steps:${NC}"
+        printf "${BOLD}Next Steps:${NC}\n"
         echo ""
-        echo "  1. Ensure DNS A record for ${CYAN}$DOMAIN${NC} points to this server"
+        printf "  1. Ensure DNS A record for ${CYAN}%s${NC} points to this server\n" "$DOMAIN"
         echo ""
         echo "  2. Ensure ports 80 and 443 are open in your firewall:"
-        echo "     ${CYAN}sudo ufw allow 80/tcp${NC}"
-        echo "     ${CYAN}sudo ufw allow 443/tcp${NC}"
+        printf "     ${CYAN}sudo ufw allow 80/tcp${NC}\n"
+        printf "     ${CYAN}sudo ufw allow 443/tcp${NC}\n"
         echo ""
         echo "  3. Start the application with Caddy (HTTPS + Auth):"
-        echo "     ${CYAN}docker compose --profile production up -d${NC}"
+        printf "     ${CYAN}docker compose --profile production up -d${NC}\n"
         echo ""
         echo "  4. Access your toolkit at:"
-        echo "     ${CYAN}https://$DOMAIN${NC}"
+        printf "     ${CYAN}https://%s${NC}\n" "$DOMAIN"
         echo ""
         echo "  5. Login with:"
-        echo "     Username: ${CYAN}$AUTH_USERNAME${NC}"
-        echo "     Password: ${CYAN}(the password you just set)${NC}"
+        printf "     Username: ${CYAN}%s${NC}\n" "$AUTH_USERNAME"
+        printf "     Password: ${CYAN}(the password you just set)${NC}\n"
         echo ""
         print_info "First startup may take a minute while Let's Encrypt issues your certificate."
         echo ""
         print_warning "Remember: Use VPN for multi-site deployments. Never expose"
         print_warning "UniFi controllers to the internet via port forwarding!"
     else
-        echo -e "${BOLD}Next Steps:${NC}"
+        printf "${BOLD}Next Steps:${NC}\n"
         echo ""
         echo "  1. Start the application:"
-        echo "     ${CYAN}docker compose up -d${NC}"
+        printf "     ${CYAN}docker compose up -d${NC}\n"
         echo ""
         echo "     Or run directly with Python:"
-        echo "     ${CYAN}pip install -r requirements.txt${NC}"
-        echo "     ${CYAN}python run.py${NC}"
+        printf "     ${CYAN}pip install -r requirements.txt${NC}\n"
+        printf "     ${CYAN}python run.py${NC}\n"
         echo ""
         echo "  2. Access your toolkit at:"
-        echo "     ${CYAN}http://localhost:8000${NC}"
+        printf "     ${CYAN}http://localhost:8000${NC}\n"
         echo ""
         print_warning "No authentication is configured for local deployment."
         print_warning "Keep this application on a trusted network only."
@@ -449,7 +449,7 @@ EOF
 
     echo ""
     echo "For help and documentation:"
-    echo "  ${CYAN}https://github.com/CrosstalkSolutions/unifi-toolkit${NC}"
+    printf "  ${CYAN}https://github.com/CrosstalkSolutions/unifi-toolkit${NC}\n"
     echo ""
 }
 

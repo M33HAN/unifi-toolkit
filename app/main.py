@@ -22,6 +22,7 @@ from tools.threat_watch.scheduler import start_scheduler as start_threat_schedul
 
 # Import authentication router and middleware
 from app.routers.auth import router as auth_router, AuthMiddleware, is_auth_enabled
+from app.routers.config import router as config_router
 
 # Configure logging
 logging.basicConfig(
@@ -101,6 +102,9 @@ app.add_middleware(AuthMiddleware)
 
 # Include authentication router
 app.include_router(auth_router)
+
+# Include configuration router
+app.include_router(config_router)
 
 # Mount Wi-Fi Stalker sub-application
 stalker_app = create_stalker_app()

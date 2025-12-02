@@ -205,9 +205,99 @@
             </div>
             <div class="status-error" id="status-error">
                 <span id="error-message">Unable to connect</span>
-                <a href="/stalker/" class="configure-link">Configure UniFi Connection</a>
+                <a href="#" class="configure-link" id="configure-link">Configure UniFi Connection</a>
             </div>
         </section>
+
+        <!-- UniFi Configuration Modal -->
+        <div id="config-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>UniFi Controller Configuration</h2>
+                    <button class="close-btn" id="close-modal-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="config-form">
+                        <div class="form-group">
+                            <label for="controller_url">Controller URL *</label>
+                            <input type="text"
+                                   id="controller_url"
+                                   name="controller_url"
+                                   placeholder="https://192.168.200.1"
+                                   required>
+                            <small>For UCG/UDM: https://192.168.x.x (no port needed)</small>
+                        </div>
+
+                        <div class="auth-info-box">
+                            <strong>Authentication Method:</strong>
+                            <p>
+                                🔐 <strong>UniFi OS (UCG, UDM):</strong> Use API Key<br>
+                                🔑 <strong>Legacy Controllers:</strong> Use Username & Password
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="api_key">API Key (for UniFi OS devices)</label>
+                            <input type="password"
+                                   id="api_key"
+                                   name="api_key"
+                                   placeholder="Enter API key from UniFi Settings > Integrations">
+                            <small>Leave blank if using username/password</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="username">Username (for legacy controllers)</label>
+                            <input type="text"
+                                   id="username"
+                                   name="username"
+                                   placeholder="admin"
+                                   value="admin">
+                            <small>Leave blank if using API key</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password (for legacy controllers)</label>
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   placeholder="Your password">
+                            <small>Leave blank if using API key</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="site_id">Site ID</label>
+                            <input type="text"
+                                   id="site_id"
+                                   name="site_id"
+                                   value="default">
+                            <small>Usually "default" for single-site setups</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox"
+                                       id="verify_ssl"
+                                       name="verify_ssl">
+                                Verify SSL Certificates
+                            </label>
+                            <small>Uncheck for self-signed certificates</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Config</button>
+                            <button type="button" id="test-connection-btn" class="btn btn-secondary">
+                                Test Connection
+                            </button>
+                            <button type="button" id="cancel-config-btn" class="btn btn-secondary">
+                                Cancel
+                            </button>
+                        </div>
+
+                        <div id="config-message" class="message" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -589,6 +679,144 @@
 
             // Refresh every 60 seconds
             setInterval(loadSystemStatus, 60000);
+        })();
+
+        // UniFi Configuration Modal
+        (function() {
+            const configModal = document.getElementById('config-modal');
+            const configureLink = document.getElementById('configure-link');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const cancelConfigBtn = document.getElementById('cancel-config-btn');
+            const configForm = document.getElementById('config-form');
+            const testConnectionBtn = document.getElementById('test-connection-btn');
+            const configMessage = document.getElementById('config-message');
+
+            // Show config message
+            function showConfigMessage(message, type = 'info') {
+                configMessage.textContent = message;
+                configMessage.className = `message ${type}`;
+                configMessage.style.display = 'block';
+                setTimeout(() => {
+                    configMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            // Open modal
+            function openModal() {
+                configModal.style.display = 'flex';
+                loadExistingConfig();
+            }
+
+            // Close modal
+            function closeModal() {
+                configModal.style.display = 'none';
+                configMessage.style.display = 'none';
+            }
+
+            // Load existing config
+            async function loadExistingConfig() {
+                try {
+                    const response = await fetch('/api/config/unifi');
+                    if (response.ok) {
+                        const config = await response.json();
+                        document.getElementById('controller_url').value = config.controller_url || '';
+                        document.getElementById('username').value = config.username || 'admin';
+                        document.getElementById('site_id').value = config.site_id || 'default';
+                        document.getElementById('verify_ssl').checked = config.verify_ssl || false;
+                    }
+                } catch (error) {
+                    console.log('No existing config found');
+                }
+            }
+
+            // Save config
+            async function saveConfig(e) {
+                e.preventDefault();
+
+                const formData = new FormData(configForm);
+                const data = {
+                    controller_url: formData.get('controller_url'),
+                    username: formData.get('username') || 'admin',
+                    password: formData.get('password') || null,
+                    api_key: formData.get('api_key') || null,
+                    site_id: formData.get('site_id') || 'default',
+                    verify_ssl: formData.get('verify_ssl') === 'on'
+                };
+
+                // Validate that either password or API key is provided
+                if (!data.password && !data.api_key) {
+                    showConfigMessage('Please provide either a password or API key', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/config/unifi', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showConfigMessage('Configuration saved successfully!', 'success');
+                        // Reload system status after saving
+                        setTimeout(() => {
+                            closeModal();
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showConfigMessage(result.detail || 'Failed to save configuration', 'error');
+                    }
+                } catch (error) {
+                    showConfigMessage('Error saving configuration: ' + error.message, 'error');
+                }
+            }
+
+            // Test connection
+            async function testConnection() {
+                testConnectionBtn.disabled = true;
+                testConnectionBtn.textContent = 'Testing...';
+                showConfigMessage('Testing connection to UniFi controller...', 'info');
+
+                try {
+                    const response = await fetch('/api/config/unifi/test');
+                    const result = await response.json();
+
+                    if (result.connected) {
+                        let message = `✓ Connected successfully! Found ${result.client_count || 0} clients`;
+                        if (result.site_name) {
+                            message += ` in site "${result.site_name}"`;
+                        }
+                        showConfigMessage(message, 'success');
+                    } else {
+                        showConfigMessage(`✗ Connection failed: ${result.error || 'Unknown error'}`, 'error');
+                    }
+                } catch (error) {
+                    showConfigMessage('Error testing connection: ' + error.message, 'error');
+                } finally {
+                    testConnectionBtn.disabled = false;
+                    testConnectionBtn.textContent = 'Test Connection';
+                }
+            }
+
+            // Event listeners
+            configureLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal();
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelConfigBtn.addEventListener('click', closeModal);
+            configForm.addEventListener('submit', saveConfig);
+            testConnectionBtn.addEventListener('click', testConnection);
+
+            // Close modal when clicking outside
+            configModal.addEventListener('click', (e) => {
+                if (e.target === configModal) {
+                    closeModal();
+                }
+            });
         })();
     </script>
 </body>
