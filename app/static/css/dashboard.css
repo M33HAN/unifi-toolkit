@@ -705,6 +705,14 @@ body {
     margin-top: 1rem;
 }
 
+.donate-link {
+    color: var(--accent-color) !important;
+}
+
+.donate-link:hover {
+    opacity: 0.8;
+}
+
 /* Header Actions */
 .header-actions {
     display: flex;

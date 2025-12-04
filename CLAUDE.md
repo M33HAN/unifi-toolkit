@@ -502,6 +502,11 @@ The scheduler runs automatically, but to test immediately, restart the app (refr
 
 ## Future Enhancements
 
+### Planned Features
+- **Multi-site support** - Ability to monitor and switch between multiple UniFi sites
+- **Rotating ad banners** - Fetch banner ads from a central JSON source for dynamic updates without app changes
+
+### Architecture Notes
 As new tools are added:
 - They will mount at their own prefix (`/ids`, `/recommender`, etc.)
 - They will share the same UniFi configuration

@@ -287,6 +287,12 @@ unifi-toolkit/
 - **Issues**: [GitHub Issues](https://github.com/CrosstalkSolutions/unifi-toolkit/issues)
 - **Documentation**: [docs/](docs/)
 
+### Buy Me a Coffee
+
+If you find UI Toolkit useful, consider supporting development:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/crosstalk)
+
 ---
 
 ## Credits
