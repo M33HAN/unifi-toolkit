@@ -635,6 +635,38 @@ body {
     margin-bottom: 0.5rem;
 }
 
+/* Promo Banner */
+.promo-banner {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.promo-banner a {
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.promo-banner a:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.promo-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .promo-banner {
+        margin: 0 0 1.5rem;
+    }
+}
+
 /* Footer */
 .footer {
     text-align: center;
