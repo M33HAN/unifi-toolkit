@@ -123,7 +123,7 @@
 
                 <!-- Access Points -->
                 <div class="ap-section">
-                    <h3>Access Points</h3>
+                    <h3>Access Points <span class="section-hint">(Click for detail)</span></h3>
                     <div class="ap-grid">
                         <template x-for="ap in data.access_points" :key="ap.mac">
                             <div class="ap-card clickable"
@@ -151,7 +151,7 @@
             <div class="charts-row">
                 <!-- Clients by Band -->
                 <div class="chart-card">
-                    <h3>Clients by Band</h3>
+                    <h3>Clients by Band <a href="#" class="chart-toggle" @click.prevent="toggleBandWired()">(<span x-text="hideBandWired ? 'show' : 'hide'"></span> Wired)</a></h3>
                     <div class="chart-container">
                         <canvas id="bandChart"></canvas>
                     </div>
@@ -159,7 +159,7 @@
 
                 <!-- Clients by SSID -->
                 <div class="chart-card">
-                    <h3>Clients by SSID</h3>
+                    <h3>Clients by SSID <a href="#" class="chart-toggle" @click.prevent="toggleSsidWired()">(<span x-text="hideSsidWired ? 'show' : 'hide'"></span> Wired)</a></h3>
                     <div class="chart-container">
                         <canvas id="ssidChart"></canvas>
                     </div>

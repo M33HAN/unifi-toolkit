@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Current Tools:**
 - **Wi-Fi Stalker v0.10.0** - Track specific client devices, monitor roaming, block/unblock devices, and maintain connection history with webhook alerts
 - **Threat Watch v0.3.0** - Monitor IDS/IPS events, view blocked threats, analyze attack patterns, and receive webhook alerts (with automatic detection of gateway IDS/IPS capability)
-- **Network Pulse v0.2.0** - Real-time network monitoring dashboard with Chart.js visualizations (clients by band, clients by SSID, top bandwidth), clickable AP cards with detail pages, and WebSocket-powered live updates
+- **Network Pulse v0.3.0** - Real-time network monitoring dashboard with Chart.js visualizations (clients by band, clients by SSID, top bandwidth), clickable AP cards with detail pages, hide/show wired toggle on charts, and WebSocket-powered live updates
 
 **External Tools (linked from dashboard):**
 - **UI Product Selector** - External site at uiproductselector.com for UniFi product recommendations
@@ -534,11 +534,13 @@ Three Chart.js visualizations on the main dashboard:
 - **Clients by SSID** - Doughnut chart with dynamic colors for each network
 - **Top Bandwidth** - Horizontal bar chart showing top 5 clients by total bytes
 
+Both the Clients by Band and Clients by SSID charts have a "(hide Wired)" toggle link that filters out wired clients from the visualization. The toggle state persists in localStorage (`unifi-toolkit-hide-band-wired`, `unifi-toolkit-hide-ssid-wired`).
+
 Charts update in real-time via WebSocket when the scheduler refreshes data (every 60 seconds).
 
 ### AP Detail Pages
 
-Clicking any AP card navigates to `/pulse/ap/{ap_mac}` with:
+The Access Points section header includes "(Click for detail)" hint. Clicking any AP card navigates to `/pulse/ap/{ap_mac}` with:
 - AP info header (name, model, online/offline status)
 - Stats grid (connected clients, uptime, channels, satisfaction, TX/RX)
 - Band distribution chart for clients on that specific AP

@@ -35,6 +35,8 @@ function networkPulse() {
         ssidChart: null,
         bandwidthChart: null,
         chartsInitialized: false,
+        hideBandWired: false,
+        hideSsidWired: false,
 
         // State
         _initialized: false,
@@ -55,6 +57,10 @@ function networkPulse() {
             // Load theme from localStorage
             this.theme = localStorage.getItem('unifi-toolkit-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', this.theme);
+
+            // Load chart filter preferences from localStorage
+            this.hideBandWired = localStorage.getItem('unifi-toolkit-hide-band-wired') === 'true';
+            this.hideSsidWired = localStorage.getItem('unifi-toolkit-hide-ssid-wired') === 'true';
 
             // Listen for fullscreen changes
             document.addEventListener('fullscreenchange', () => {
@@ -221,6 +227,28 @@ function networkPulse() {
         },
 
         /**
+         * Toggle wired clients in band chart
+         */
+        toggleBandWired() {
+            this.hideBandWired = !this.hideBandWired;
+            localStorage.setItem('unifi-toolkit-hide-band-wired', this.hideBandWired);
+            // Recreate charts since Chart.js doesn't handle segment removal well
+            this.destroyCharts();
+            this.initCharts();
+        },
+
+        /**
+         * Toggle wired clients in SSID chart
+         */
+        toggleSsidWired() {
+            this.hideSsidWired = !this.hideSsidWired;
+            localStorage.setItem('unifi-toolkit-hide-ssid-wired', this.hideSsidWired);
+            // Recreate charts since Chart.js doesn't handle segment removal well
+            this.destroyCharts();
+            this.initCharts();
+        },
+
+        /**
          * Format bytes to human-readable string
          */
         formatBytes(bytes) {
@@ -337,8 +365,11 @@ function networkPulse() {
             const bandCtx = document.getElementById('bandChart');
             if (bandCtx && this.data.chart_data?.clients_by_band) {
                 const bandData = this.data.chart_data.clients_by_band;
-                const bandLabels = Object.keys(bandData);
-                const bandValues = Object.values(bandData);
+                const filteredBandData = this.hideBandWired
+                    ? Object.fromEntries(Object.entries(bandData).filter(([key]) => key !== 'Wired'))
+                    : bandData;
+                const bandLabels = Object.keys(filteredBandData);
+                const bandValues = Object.values(filteredBandData);
                 const bandColors = bandLabels.map(label => colors.bands[label] || colors.bands['Unknown']);
 
                 this.bandChart = new Chart(bandCtx, {
@@ -372,8 +403,11 @@ function networkPulse() {
             const ssidCtx = document.getElementById('ssidChart');
             if (ssidCtx && this.data.chart_data?.clients_by_ssid) {
                 const ssidData = this.data.chart_data.clients_by_ssid;
-                const ssidLabels = Object.keys(ssidData);
-                const ssidValues = Object.values(ssidData);
+                const filteredSsidData = this.hideSsidWired
+                    ? Object.fromEntries(Object.entries(ssidData).filter(([key]) => key !== 'Wired'))
+                    : ssidData;
+                const ssidLabels = Object.keys(filteredSsidData);
+                const ssidValues = Object.values(filteredSsidData);
                 const ssidColors = this.generateSsidColors(ssidLabels.length);
 
                 this.ssidChart = new Chart(ssidCtx, {
@@ -470,9 +504,12 @@ function networkPulse() {
             // Update Band Chart
             if (this.bandChart && this.data.chart_data?.clients_by_band) {
                 const bandData = this.data.chart_data.clients_by_band;
+                const filteredBandData = this.hideBandWired
+                    ? Object.fromEntries(Object.entries(bandData).filter(([key]) => key !== 'Wired'))
+                    : bandData;
                 const colors = this.getChartColors();
-                const bandLabels = Object.keys(bandData);
-                const bandValues = Object.values(bandData);
+                const bandLabels = Object.keys(filteredBandData);
+                const bandValues = Object.values(filteredBandData);
                 const bandColors = bandLabels.map(label => colors.bands[label] || colors.bands['Unknown']);
 
                 this.bandChart.data.labels = bandLabels;
@@ -484,8 +521,11 @@ function networkPulse() {
             // Update SSID Chart
             if (this.ssidChart && this.data.chart_data?.clients_by_ssid) {
                 const ssidData = this.data.chart_data.clients_by_ssid;
-                const ssidLabels = Object.keys(ssidData);
-                const ssidValues = Object.values(ssidData);
+                const filteredSsidData = this.hideSsidWired
+                    ? Object.fromEntries(Object.entries(ssidData).filter(([key]) => key !== 'Wired'))
+                    : ssidData;
+                const ssidLabels = Object.keys(filteredSsidData);
+                const ssidValues = Object.values(filteredSsidData);
                 const ssidColors = this.generateSsidColors(ssidLabels.length);
 
                 this.ssidChart.data.labels = ssidLabels;

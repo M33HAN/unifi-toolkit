@@ -243,6 +243,28 @@ body {
     letter-spacing: 0.05em;
 }
 
+.section-hint {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.chart-toggle {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--accent-color);
+    text-transform: none;
+    letter-spacing: normal;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.chart-toggle:hover {
+    text-decoration: underline;
+}
+
 /* Throughput Card */
 .throughput-card {
     display: flex;
