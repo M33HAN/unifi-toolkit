@@ -2,6 +2,28 @@
 
 All notable changes to UI Toolkit will be documented in this file.
 
+## [1.8.0] - 2025-12-23
+
+### Testing Infrastructure
+
+#### Added
+- **Comprehensive test suite** - 68 tests across 4 test modules covering core shared infrastructure
+  - `tests/test_auth.py` - Authentication, session management, rate limiting (23 tests)
+  - `tests/test_cache.py` - In-memory caching with TTL expiration (20 tests)
+  - `tests/test_config.py` - Pydantic settings and environment variables (13 tests)
+  - `tests/test_crypto.py` - Fernet encryption for credentials (12 tests)
+- **Test configuration** - pytest.ini with asyncio mode and test path settings
+- **Development dependencies** - requirements-dev.txt with pytest, pytest-asyncio, pytest-mock
+- **Test fixtures** - conftest.py with shared fixtures for async database testing
+
+### Claude Code Agents
+
+#### Added
+- **Wrapup agent** (`/wrapup`) - End-of-session workflow for documentation updates, version bumps, clean commits, and git push
+- **Test-changes agent** (`/test-changes`) - Analyzes git changes and writes comprehensive tests with mocking and error handling
+
+---
+
 ## [1.7.0] - 2025-12-21
 
 ### Network Pulse v0.2.0

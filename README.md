@@ -292,6 +292,50 @@ unifi-toolkit/
 
 ---
 
+## Development
+
+### Running Tests
+
+The project includes a comprehensive test suite covering authentication, caching, configuration, and encryption.
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run all tests
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_auth.py -v
+
+# Run with coverage
+pytest tests/ --cov=shared --cov=app -v
+```
+
+**Test modules:**
+- `tests/test_auth.py` - Authentication, session management, rate limiting (23 tests)
+- `tests/test_cache.py` - In-memory caching with TTL expiration (20 tests)
+- `tests/test_config.py` - Pydantic settings and environment variables (13 tests)
+- `tests/test_crypto.py` - Fernet encryption for credentials (12 tests)
+
+### Claude Code Agents
+
+Two specialized agents are available for development workflows:
+
+**Wrapup Agent** (`/wrapup`)
+- End-of-session workflow automation
+- Updates documentation based on changes
+- Suggests version bumps
+- Creates clean commits and pushes to git
+
+**Test-Changes Agent** (`/test-changes`)
+- Analyzes git changes
+- Writes comprehensive tests with mocking
+- Covers happy paths, edge cases, and error scenarios
+- Runs tests to verify they pass
+
+---
+
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/CrosstalkSolutions/unifi-toolkit/issues)
