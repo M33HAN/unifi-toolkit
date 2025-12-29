@@ -93,22 +93,17 @@ python3.11 --version
 
 ### Step 1: Clone the Repository
 
-**Note:** This is a private repository. You need GitHub access and SSH keys configured.
-
 ```bash
 # Create the installation directory and set ownership
 sudo mkdir -p /opt/unifi-toolkit
 sudo chown $USER:$USER /opt/unifi-toolkit
 
-# Clone the repository (requires SSH key access)
-# Important: Don't use sudo here - sudo can't access your SSH keys
-git clone git@github.com:Crosstalk-Solutions/unifi-toolkit.git /opt/unifi-toolkit
+# Clone the repository
+git clone https://github.com/Crosstalk-Solutions/unifi-toolkit.git /opt/unifi-toolkit
 
 # Navigate into the directory
 cd /opt/unifi-toolkit
 ```
-
-If you haven't set up SSH keys for GitHub, see: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
 
 ### Step 2: Run the Setup Wizard
 
@@ -598,7 +593,7 @@ When managing multiple UniFi sites:
 
 ## Getting Help
 
-- **GitHub Issues**: [Report a bug or request a feature](https://github.com/CrosstalkSolutions/unifi-toolkit/issues)
+- **GitHub Issues**: [Report a bug or request a feature](https://github.com/Crosstalk-Solutions/unifi-toolkit/issues)
 - **Documentation**: Check the `docs/` directory for additional guides
 
 ---
@@ -608,7 +603,7 @@ When managing multiple UniFi sites:
 ### Local Deployment
 ```bash
 sudo mkdir -p /opt/unifi-toolkit && sudo chown $USER:$USER /opt/unifi-toolkit
-git clone git@github.com:Crosstalk-Solutions/unifi-toolkit.git /opt/unifi-toolkit
+git clone https://github.com/Crosstalk-Solutions/unifi-toolkit.git /opt/unifi-toolkit
 cd /opt/unifi-toolkit
 ./setup.sh  # Select 1 for Local
 docker compose up -d
@@ -618,7 +613,7 @@ docker compose up -d
 ### Production Deployment
 ```bash
 sudo mkdir -p /opt/unifi-toolkit && sudo chown $USER:$USER /opt/unifi-toolkit
-git clone git@github.com:Crosstalk-Solutions/unifi-toolkit.git /opt/unifi-toolkit
+git clone https://github.com/Crosstalk-Solutions/unifi-toolkit.git /opt/unifi-toolkit
 cd /opt/unifi-toolkit
 ./setup.sh  # Select 2 for Production
 sudo ufw allow 80/tcp && sudo ufw allow 443/tcp
