@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # UI Toolkit - Upgrade Script
-# Handles git pull, Docker rebuild, and database migrations
+# Handles git pull, Docker image updates, and database migrations
 #
 
 set -e
@@ -171,12 +171,12 @@ main() {
         print_success "Upgrading from $OLD_VERSION to $NEW_VERSION"
     fi
 
-    # Step 3: Rebuild Docker image
-    print_step "3" "Rebuilding Docker image"
-    if $COMPOSE_CMD build --no-cache; then
-        print_success "Docker image rebuilt"
+    # Step 3: Pull latest Docker image
+    print_step "3" "Pulling latest Docker image"
+    if $COMPOSE_CMD pull; then
+        print_success "Docker image updated"
     else
-        print_error "Docker build failed"
+        print_error "Docker pull failed"
         exit 1
     fi
 

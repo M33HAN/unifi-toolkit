@@ -48,7 +48,7 @@ The project includes an upgrade script (`upgrade.sh`) for easy updates:
 - Detects deployment mode (local/production) from `.env`
 - Stops running containers
 - Pulls latest code from git
-- Rebuilds Docker image (with `--no-cache`)
+- Pulls latest Docker image from GitHub Container Registry
 - Runs database migrations with smart error handling:
   - Normal migrations: runs `alembic upgrade head`
   - Tables already exist: automatically stamps database to current version
@@ -225,7 +225,7 @@ python run.py
 ### Docker Deployment
 
 ```bash
-# Build and start
+# Pull and start
 docker compose up -d
 
 # View logs

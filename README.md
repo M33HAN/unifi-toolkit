@@ -233,7 +233,7 @@ Never expose UniFi controllers via port forwarding
 ### Docker issues
 - Verify `.env` exists and contains `ENCRYPTION_KEY`
 - Check logs: `docker compose logs -f`
-- Rebuild: `docker compose build && docker compose up -d`
+- Pull latest image: `docker compose pull && docker compose up -d`
 
 ---
 

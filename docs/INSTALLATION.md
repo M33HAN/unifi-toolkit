@@ -137,7 +137,7 @@ Select deployment type [1-2]: 1
 ### Start with Docker (Recommended)
 
 ```bash
-# Build and start the container
+# Pull and start the container
 docker compose up -d
 
 # View logs (optional)
@@ -145,6 +145,8 @@ docker compose logs -f
 
 # Stop viewing logs with Ctrl+C
 ```
+
+The pre-built image is pulled automatically from GitHub Container Registry.
 
 ### Start with Python (Alternative)
 
@@ -260,7 +262,7 @@ nslookup toolkit.yourdomain.com
 ### Start with Docker
 
 ```bash
-# Build and start with production profile (includes Caddy)
+# Start with production profile (includes Caddy)
 docker compose --profile production up -d
 
 # View logs to monitor certificate acquisition
@@ -348,8 +350,8 @@ docker compose logs -f
 # Restart the application
 docker compose restart
 
-# Rebuild after updates
-docker compose build
+# Pull latest image
+docker compose pull
 docker compose up -d
 ```
 
@@ -394,7 +396,7 @@ The upgrade script will:
 1. Detect your deployment mode (local or production)
 2. Stop the running containers
 3. Pull the latest code from git
-4. Rebuild the Docker image
+4. Pull the latest Docker image from GitHub Container Registry
 5. Run database migrations (with smart error handling)
 6. Restart the application
 
@@ -405,11 +407,10 @@ If you prefer to update manually:
 ```bash
 cd /opt/unifi-toolkit
 
-# Pull latest changes
-git pull origin main
+# Pull latest image from GitHub Container Registry
+docker compose pull
 
-# Rebuild and start
-docker compose build
+# Start with updated image
 docker compose up -d                          # Local mode
 # OR
 docker compose --profile production up -d     # Production mode
