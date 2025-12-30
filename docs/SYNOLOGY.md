@@ -44,19 +44,20 @@ LOG_LEVEL=INFO
 
 2. Generate an encryption key using one of these methods:
 
-   **On a Mac/Linux computer:**
+   **Option 1: Online generator (easiest)**
+   - Go to https://fernetkeygen.com/
+   - Copy the generated key
+
+   **Option 2: Mac/Linux terminal**
    ```bash
    python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
    ```
 
-   **On Windows (PowerShell):**
+   **Option 3: Windows (requires one-time setup)**
    ```powershell
+   pip install cryptography
    python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
    ```
-
-   **No Python? Use this online generator:**
-   - Go to https://fernetkeygen.com/
-   - Copy the generated key
 
 3. Paste the generated key into your `env.txt` file, replacing `paste-your-key-here`
 
