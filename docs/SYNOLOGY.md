@@ -155,11 +155,12 @@ You should see the container running. It will also appear in Container Manager's
 
 ### Updating (Method A)
 
+> **Note:** Container Manager only shows "update available" for Docker Hub images. For ghcr.io images, you must update manually via SSH.
+
 ```bash
 ssh your-admin-user@your-synology-ip
 sudo docker pull ghcr.io/crosstalk-solutions/unifi-toolkit:latest
-sudo docker stop unifi-toolkit
-sudo docker rm unifi-toolkit
+sudo docker stop unifi-toolkit && sudo docker rm unifi-toolkit
 sudo docker run -d \
   --name unifi-toolkit \
   --restart unless-stopped \
@@ -232,6 +233,8 @@ sudo docker pull ghcr.io/crosstalk-solutions/unifi-toolkit:latest
 6. Click **Done** to create and start the project
 
 ### Updating (Method B)
+
+> **Note:** Container Manager won't notify you of updates for ghcr.io images.
 
 1. SSH into your Synology and pull the new image:
    ```bash
