@@ -978,6 +978,9 @@ function dashboard() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const textColor = isDark ? '#e5e7eb' : '#374151';
 
+            const total = this.dwellTimeData.total_minutes;
+            const showHours = this.dwellTimeShowHours;
+
             this.dwellTimeChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -997,21 +1000,39 @@ function dashboard() {
                             labels: {
                                 color: textColor,
                                 padding: 10,
-                                usePointStyle: true
+                                usePointStyle: true,
+                                generateLabels: (chart) => {
+                                    const dataset = chart.data.datasets[0];
+                                    return chart.data.labels.map((label, i) => {
+                                        const minutes = dataset.data[i];
+                                        const pct = ((minutes / total) * 100).toFixed(1);
+                                        let displayValue;
+                                        if (showHours) {
+                                            const hours = (minutes / 60).toFixed(1);
+                                            displayValue = `${label}: ${hours}h`;
+                                        } else {
+                                            displayValue = `${label}: ${pct}%`;
+                                        }
+                                        return {
+                                            text: displayValue,
+                                            fillStyle: dataset.backgroundColor[i],
+                                            strokeStyle: dataset.backgroundColor[i],
+                                            lineWidth: 0,
+                                            pointStyle: 'circle',
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
                             }
                         },
                         tooltip: {
                             callbacks: {
                                 label: (context) => {
                                     const minutes = context.raw;
-                                    const total = this.dwellTimeData.total_minutes;
                                     const pct = ((minutes / total) * 100).toFixed(1);
-
-                                    if (this.dwellTimeShowHours) {
-                                        const hours = (minutes / 60).toFixed(1);
-                                        return `${context.label}: ${hours}h (${pct}%)`;
-                                    }
-                                    return `${context.label}: ${pct}%`;
+                                    const hours = (minutes / 60).toFixed(1);
+                                    return `${context.label}: ${hours}h (${pct}%)`;
                                 }
                             }
                         }
