@@ -77,3 +77,4 @@ docker-compose.override.yml
 /assets/
 /drafts/
 /docs/ROADMAP.md
+CLAUDE.md
