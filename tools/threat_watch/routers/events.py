@@ -355,8 +355,9 @@ async def debug_test_fetch(
     """
     Debug endpoint to test IPS event fetching from UniFi.
 
-    This endpoint connects to UniFi, attempts to fetch IPS events,
-    and returns diagnostic information about the response.
+    This endpoint connects to UniFi, attempts to fetch IPS events using both
+    the v2 traffic-flows API (Network 10.x+) and legacy stat/ips/event API,
+    and returns diagnostic information about the responses.
     """
     from shared.models.unifi_config import UniFiConfig
     from shared.unifi_client import UniFiClient
@@ -417,8 +418,47 @@ async def debug_test_fetch(
         now_ms = int(time.time() * 1000)
         day_ago_ms = now_ms - (24 * 60 * 60 * 1000)
 
-        # Fetch events
-        events = await client.get_ips_events(start=day_ago_ms, end=now_ms)
+        # Test both APIs separately for diagnostics
+        v2_events = []
+        legacy_events = []
+        v2_error = None
+        legacy_error = None
+
+        # Test v2 traffic-flows API (Network 10.x+)
+        if client.is_unifi_os:
+            try:
+                v2_events = await client.get_traffic_flows(limit=10, time_range="24h")
+            except Exception as e:
+                v2_error = str(e)
+
+        # Test legacy stat/ips/event API
+        try:
+            if client.is_unifi_os:
+                url = f"{client.host}/proxy/network/api/s/{client.site}/stat/ips/event"
+            else:
+                url = f"{client.host}/api/s/{client.site}/stat/ips/event"
+
+            payload = {
+                "start": day_ago_ms,
+                "end": now_ms,
+                "_limit": 10
+            }
+
+            async with client._session.post(url, json=payload) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    legacy_events = data.get('data', [])
+                else:
+                    legacy_error = f"HTTP {resp.status}"
+        except Exception as e:
+            legacy_error = str(e)
+
+        # Determine which API is working
+        working_api = None
+        if v2_events:
+            working_api = "v2_traffic_flows"
+        elif legacy_events:
+            working_api = "legacy_stat_ips_event"
 
         # Build diagnostic response
         response = {
@@ -431,15 +471,26 @@ async def debug_test_fetch(
             },
             "gateway": gateway_info,
             "ips_settings": ips_settings,
-            "events_fetch": {
-                "time_range_ms": {
-                    "start": day_ago_ms,
-                    "end": now_ms
+            "api_tests": {
+                "v2_traffic_flows": {
+                    "available": client.is_unifi_os,
+                    "events_returned": len(v2_events),
+                    "error": v2_error,
+                    "sample_event_keys": list(v2_events[0].keys()) if v2_events else None,
+                    "sample_event": v2_events[0] if v2_events else None,
+                    "endpoint": "/proxy/network/v2/api/site/{site}/traffic-flows"
                 },
-                "events_returned": len(events),
-                "sample_event_keys": list(events[0].keys()) if events else None,
-                "sample_event": events[0] if events else None
-            }
+                "legacy_stat_ips_event": {
+                    "available": True,
+                    "events_returned": len(legacy_events),
+                    "error": legacy_error,
+                    "sample_event_keys": list(legacy_events[0].keys()) if legacy_events else None,
+                    "sample_event": legacy_events[0] if legacy_events else None,
+                    "endpoint": "/proxy/network/api/s/{site}/stat/ips/event"
+                }
+            },
+            "working_api": working_api,
+            "total_events": len(v2_events) + len(legacy_events)
         }
 
         # Check for common issues
@@ -451,9 +502,13 @@ async def debug_test_fetch(
         if ips_settings and not ips_settings.get("ips_enabled"):
             issues.append(f"IDS/IPS is disabled (mode: {ips_settings.get('ips_mode')})")
         if not client.is_unifi_os:
-            issues.append("Legacy controller detected - IPS API may not be available")
-        if len(events) == 0:
-            issues.append("No events returned - this may be normal if no threats have been detected in the last 24 hours")
+            issues.append("Legacy controller detected - v2 API not available")
+        if len(v2_events) == 0 and len(legacy_events) == 0:
+            issues.append("No events returned from either API - this may be normal if no threats detected in last 24 hours")
+        if v2_events and not legacy_events:
+            issues.append("Only v2 API returned events - using Network 10.x traffic-flows endpoint")
+        if legacy_events and not v2_events and client.is_unifi_os:
+            issues.append("Only legacy API returned events - v2 traffic-flows may not be available on this firmware")
 
         if issues:
             response["issues"] = issues

@@ -847,6 +847,85 @@ class UniFiClient:
             logger.error(f"Error setting name for {mac_address}: {e}")
             return False
 
+    async def get_traffic_flows(
+        self,
+        limit: int = 100,
+        time_range: str = "24h",
+        policy_types: List[str] = None
+    ) -> List[Dict]:
+        """
+        Get traffic flows from UniFi Network 10.x v2 API.
+
+        This is the new endpoint that replaces stat/ips/event in Network 10.x.
+        Traffic flows include IPS events when they have an 'ips' object.
+
+        Args:
+            limit: Maximum number of events to return (default: 100, max per request)
+            time_range: Time range string like "24h", "7d" (default: "24h")
+            policy_types: Filter by policy types (not reliably supported server-side)
+
+        Returns:
+            List of traffic flow dictionaries that contain IPS data
+        """
+        if not self._session:
+            raise RuntimeError("Not connected to UniFi controller. Call connect() first.")
+
+        if not self.is_unifi_os:
+            logger.debug("Traffic flows v2 API only available on UniFi OS")
+            return []
+
+        try:
+            url = f"{self.host}/proxy/network/v2/api/site/{self.site}/traffic-flows"
+
+            all_events = []
+            offset = 0
+            max_iterations = 50  # Safety limit
+
+            while len(all_events) < limit and max_iterations > 0:
+                max_iterations -= 1
+                batch_limit = min(100, limit - len(all_events))
+
+                payload = {
+                    "limit": batch_limit,
+                    "offset": offset,
+                    "timeRange": time_range
+                }
+
+                logger.debug(f"Fetching traffic flows from: {url}")
+                logger.debug(f"Traffic flows payload: {payload}")
+
+                async with self._session.post(url, json=payload) as resp:
+                    if resp.status == 405:
+                        logger.debug("Traffic flows v2 endpoint returned 405 - not available")
+                        return []
+                    if resp.status != 200:
+                        resp_text = await resp.text()
+                        logger.error(f"Failed to get traffic flows: HTTP {resp.status}")
+                        logger.debug(f"Traffic flows error response: {resp_text[:500] if resp_text else 'empty'}")
+                        return []
+
+                    data = await resp.json()
+                    flows = data.get('data', [])
+                    has_next = data.get('has_next', False)
+
+                    # Filter for flows that have IPS data
+                    ips_flows = [f for f in flows if f.get('ips')]
+                    all_events.extend(ips_flows)
+
+                    logger.debug(f"Batch: {len(flows)} flows, {len(ips_flows)} with IPS data")
+
+                    if not has_next or not flows:
+                        break
+
+                    offset += len(flows)
+
+            logger.info(f"Retrieved {len(all_events)} IPS events from traffic flows v2 API")
+            return all_events
+
+        except Exception as e:
+            logger.error(f"Failed to get traffic flows: {e}")
+            return []
+
     async def get_ips_events(
         self,
         start: int = None,
@@ -854,7 +933,10 @@ class UniFiClient:
         limit: int = 10000
     ) -> List[Dict]:
         """
-        Get IDS/IPS threat events from the UniFi controller
+        Get IDS/IPS threat events from the UniFi controller.
+
+        For Network 10.x (UniFi OS), tries the new v2 traffic-flows API first,
+        then falls back to the legacy stat/ips/event endpoint.
 
         Args:
             start: Start timestamp in milliseconds (default: 24 hours ago)
@@ -867,8 +949,16 @@ class UniFiClient:
         if not self._session:
             raise RuntimeError("Not connected to UniFi controller. Call connect() first.")
 
+        # For UniFi OS, try the v2 traffic-flows API first (Network 10.x)
+        if self.is_unifi_os:
+            v2_events = await self.get_traffic_flows(limit=min(limit, 1000), time_range="24h")
+            if v2_events:
+                logger.info(f"Using v2 traffic-flows API - got {len(v2_events)} IPS events")
+                return v2_events
+            logger.debug("v2 traffic-flows returned no events, trying legacy endpoint")
+
+        # Fall back to legacy stat/ips/event endpoint
         try:
-            # Build request payload
             import time
             now_ms = int(time.time() * 1000)
             day_ago_ms = now_ms - (24 * 60 * 60 * 1000)
@@ -884,7 +974,7 @@ class UniFiClient:
             else:
                 url = f"{self.host}/api/s/{self.site}/stat/ips/event"
 
-            logger.debug(f"Fetching IPS events from: {url}")
+            logger.debug(f"Fetching IPS events from legacy endpoint: {url}")
             logger.debug(f"IPS events payload: {payload}")
 
             async with self._session.post(url, json=payload) as resp:
@@ -902,7 +992,7 @@ class UniFiClient:
                 if meta:
                     logger.debug(f"IPS events response meta: {meta}")
 
-                logger.info(f"Retrieved {len(events)} IPS events from UniFi")
+                logger.info(f"Retrieved {len(events)} IPS events from legacy API")
 
                 # Log sample event structure if DEBUG and events exist
                 if events and logger.isEnabledFor(logging.DEBUG):
