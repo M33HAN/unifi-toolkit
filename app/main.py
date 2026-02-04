@@ -5,6 +5,7 @@ This is the main application that mounts all available tools as sub-applications
 """
 import os
 import logging
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import HTMLResponse
@@ -110,9 +111,11 @@ async def lifespan(app: FastAPI):
     else:
         logger.info("Running in LOCAL mode - authentication disabled")
 
-    # Run database migrations
+    # Run database migrations in a thread pool to avoid blocking the event loop
+    # (Alembic is synchronous and can deadlock on some platforms like Synology NAS
+    # when called directly from an async context)
     logger.info("Running database migrations...")
-    run_migrations()
+    await asyncio.to_thread(run_migrations)
 
     # Initialize database
     logger.info("Initializing database...")
