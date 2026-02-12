@@ -7,7 +7,6 @@ from aiounifi.controller import Controller
 from aiounifi.models.configuration import Configuration
 from aiounifi.interfaces.clients import ClientListRequest
 from aiounifi.interfaces.devices import DeviceListRequest
-import ssl
 import logging
 from urllib.parse import urlparse
 
@@ -214,16 +213,12 @@ class UniFiClient:
             logger.debug(f"Authentication method: {'API Key' if self.api_key else 'Username/Password'}")
             logger.debug(f"Site: {self.site}, Verify SSL: {self.verify_ssl}")
 
-            # Create SSL context
-            ssl_context = None
-            if not self.verify_ssl:
-                ssl_context = ssl.create_default_context()
-                ssl_context.check_hostname = False
-                ssl_context.verify_mode = ssl.CERT_NONE
-                logger.debug("SSL verification disabled")
-
             # Create aiohttp session
-            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            # ssl=False disables all SSL verification (for self-signed certs)
+            ssl_param = False if not self.verify_ssl else None
+            if not self.verify_ssl:
+                logger.debug("SSL verification disabled")
+            connector = aiohttp.TCPConnector(ssl=ssl_param)
 
             # Add API key header if using UniFi OS with API key
             headers = {}
