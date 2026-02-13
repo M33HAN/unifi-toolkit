@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UI Toolkit - Dashboard</title>
+    <title>{{ app_title }} - Dashboard</title>
     <link rel="icon" type="image/jpeg" href="/static/images/favicon16x16.jpg">
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <script>
@@ -20,10 +20,14 @@
         <header class="header">
             <div class="header-content">
                 <div class="header-left">
-                    <img src="/static/images/2022-Crosstalk-Solutions-Logo.png" alt="Crosstalk Solutions" class="header-logo">
+                    {% if custom_logo_path %}
+                        <img src="{{ custom_logo_path }}" alt="{{ app_title }}" class="header-logo">
+                    {% else %}
+                        <img src="/static/images/2022-Crosstalk-Solutions-Logo.png" alt="Crosstalk Solutions" class="header-logo">
+                    {% endif %}
                 </div>
                 <div class="header-center">
-                    <h1>UI Toolkit</h1>
+                    <h1>{{ app_title }}</h1>
                 </div>
                 <div class="header-right">
                     <div class="header-actions">
