@@ -14,7 +14,11 @@
         })();
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
+    <!-- Leaflet.js for threat map -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <!-- Enhanced features styles -->
+        <link rel="stylesheet" href="/threats/static/css/enhanced-features.css">
+    </head>
 <body>
     <div x-data="dashboard()" x-init="init()" class="container">
         <!-- Header -->
@@ -823,5 +827,53 @@
             });
         })();
     </script>
-</body>
+    <!-- Leaflet.js -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <!-- Enhanced features: GeoIP Map, Charts, Log Stream -->
+        <script src="/threats/static/js/enhanced-features.js"></script>
+
+        <!-- Enhanced Features HTML Containers -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Create and inject enhanced sections
+                const container = document.querySelector('.container') || document.querySelector('[x-data]');
+                if (!container) return;
+
+                const enhancedHTML = '<div class="threat-map-container">' +
+                    '<h3>Global Threat Map</h3>' +
+                    '<div id="threat-map"></div>' +
+                '</div>' +
+                '<div class="charts-grid">' +
+                    '<div class="chart-container-enhanced">' +
+                        '<h3>Threat Timeline (7 Days)</h3>' +
+                        '<div class="chart-canvas-wrapper"><canvas id="timeline-chart-enhanced"></canvas></div>' +
+                    '</div>' +
+                    '<div class="chart-container-enhanced">' +
+                        '<h3>Severity Distribution</h3>' +
+                        '<div class="chart-canvas-wrapper"><canvas id="severity-donut"></canvas></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="chart-container-enhanced">' +
+                    '<h3>Top Threat Categories</h3>' +
+                    '<div class="chart-canvas-wrapper"><canvas id="category-bar"></canvas></div>' +
+                '</div>' +
+                '<div class="log-stream-wrapper">' +
+                    '<h3>Live Threat Stream</h3>' +
+                    '<div id="live-log-stream"></div>' +
+                '</div>';
+
+                const wrapper = document.createElement('div');
+                wrapper.id = 'enhanced-sections';
+                wrapper.innerHTML = enhancedHTML;
+                
+                // Insert before events table
+                const eventsSection = container.querySelector('.events-table-container, [x-show]');
+                if (eventsSection) {
+                    container.insertBefore(wrapper, eventsSection);
+                } else {
+                    container.appendChild(wrapper);
+                }
+            });
+        </script>
+    </body>
 </html>
