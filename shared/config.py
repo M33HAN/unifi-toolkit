@@ -35,6 +35,10 @@ class ToolkitSettings(BaseSettings):
     # Tool-specific settings
     stalker_refresh_interval: int = 60
 
+        # Branding / Customization
+        custom_logo_path: Optional[str] = None  # Path to custom logo image
+    app_title: str = "UI Toolkit"  # Custom dashboard title
+
     # Server settings
     app_port: int = 8000
 
