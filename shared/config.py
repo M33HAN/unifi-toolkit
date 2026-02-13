@@ -39,6 +39,9 @@ class ToolkitSettings(BaseSettings):
     custom_logo_path: Optional[str] = None  # Path to custom logo image
     app_title: str = "UI Toolkit"  # Custom dashboard title
 
+    # Threat Intelligence
+    abuseipdb_api_key: Optional[str] = None  # AbuseIPDB API key (free: 1000 checks/day)
+
     # Server settings
     app_port: int = 8000
 
