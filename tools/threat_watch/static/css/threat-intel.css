@@ -1,0 +1,559 @@
+/**
+ * Threat Intelligence Panel Styles
+ * Slide-out panel for AbuseIPDB threat lookups
+ */
+
+/* ============================================================
+   SLIDE-OUT PANEL
+   ============================================================ */
+.intel-panel {
+    position: fixed;
+    top: 0;
+    right: -480px;
+    width: 460px;
+    height: 100vh;
+    background: rgba(8, 8, 24, 0.97);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(0, 225, 255, 0.15);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.intel-panel-open {
+    right: 0;
+}
+
+/* Overlay */
+.intel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.intel-overlay-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ============================================================
+   PANEL HEADER
+   ============================================================ */
+.intel-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(0, 225, 255, 0.1);
+    background: rgba(0, 225, 255, 0.03);
+    flex-shrink: 0;
+}
+
+.intel-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00e1ff, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.intel-icon {
+    font-size: 1.3rem;
+    -webkit-text-fill-color: initial;
+}
+
+.intel-close-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.intel-close-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+/* ============================================================
+   PANEL BODY
+   ============================================================ */
+.intel-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 225, 255, 0.2) transparent;
+}
+
+.intel-panel-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.intel-panel-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.intel-panel-body::-webkit-scrollbar-thumb {
+    background: rgba(0, 225, 255, 0.15);
+    border-radius: 3px;
+}
+
+/* ============================================================
+   SEARCH BAR
+   ============================================================ */
+.intel-search-bar {
+    display: flex;
+    gap: 8px;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.intel-ip-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 225, 255, 0.15);
+    border-radius: 8px;
+    background: rgba(0, 225, 255, 0.04);
+    color: #e2e8f0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.intel-ip-input:focus {
+    border-color: rgba(0, 225, 255, 0.4);
+    box-shadow: 0 0 12px rgba(0, 225, 255, 0.1);
+}
+
+.intel-ip-input::placeholder {
+    color: #475569;
+}
+
+.intel-search-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(0, 225, 255, 0.3);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(0, 225, 255, 0.15), rgba(139, 92, 246, 0.15));
+    color: #00e1ff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.intel-search-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 225, 255, 0.25), rgba(139, 92, 246, 0.25));
+    border-color: rgba(0, 225, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 225, 255, 0.15);
+}
+
+/* ============================================================
+   FLOATING TRIGGER BUTTON
+   ============================================================ */
+.intel-trigger-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 10px 18px;
+    border: 1px solid rgba(0, 225, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(10, 10, 30, 0.9);
+    backdrop-filter: blur(12px);
+    color: #00e1ff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.intel-trigger-btn:hover {
+    background: rgba(0, 225, 255, 0.1);
+    border-color: rgba(0, 225, 255, 0.4);
+    box-shadow: 0 4px 25px rgba(0, 225, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.intel-trigger-active {
+    background: rgba(0, 225, 255, 0.15);
+    border-color: rgba(0, 225, 255, 0.5);
+}
+
+.intel-trigger-icon {
+    font-size: 1.1rem;
+}
+
+/* ============================================================
+   PLACEHOLDER STATE
+   ============================================================ */
+.intel-placeholder {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #64748b;
+}
+
+.intel-placeholder-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.intel-placeholder p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* ============================================================
+   LOADING STATE
+   ============================================================ */
+.intel-loading {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #94a3b8;
+}
+
+.intel-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 225, 255, 0.1);
+    border-top-color: #00e1ff;
+    border-radius: 50%;
+    animation: intelSpin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes intelSpin {
+    to { transform: rotate(360deg); }
+}
+
+.intel-loading p {
+    margin: 0.25rem 0;
+}
+
+.intel-loading-sub {
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+/* ============================================================
+   ERROR STATE
+   ============================================================ */
+.intel-error {
+    text-align: center;
+    padding: 2rem;
+    color: #ef4444;
+}
+
+.intel-error-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.intel-error p {
+    font-size: 0.9rem;
+    color: #fca5a5;
+}
+
+/* ============================================================
+   RESULTS CARD
+   ============================================================ */
+.intel-result-card {
+    padding: 1.25rem;
+}
+
+/* Score Section */
+.intel-score-section {
+    text-align: center;
+    padding: 1rem 0 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 1.25rem;
+}
+
+.intel-score-gauge {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 0.75rem;
+}
+
+.intel-gauge-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.intel-gauge-arc {
+    transition: stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 6px var(--score-color));
+}
+
+.intel-score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.intel-score-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    font-size: 0.65rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.intel-risk-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+/* Info Grid */
+.intel-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.intel-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.intel-info-label {
+    font-size: 0.7rem;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.intel-info-value {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    word-break: break-all;
+}
+
+.intel-ip-mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: #00e1ff;
+}
+
+/* Badges */
+.intel-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1.25rem;
+}
+
+.intel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.intel-badge-tor {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.intel-badge-safe {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.intel-badge-warn {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.intel-badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* External Links */
+.intel-external-links {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.intel-ext-link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #94a3b8;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.intel-ext-link:hover {
+    background: rgba(0, 225, 255, 0.08);
+    border-color: rgba(0, 225, 255, 0.2);
+    color: #00e1ff;
+}
+
+/* ============================================================
+   REPORTS SECTION
+   ============================================================ */
+.intel-reports-section {
+    margin-top: 0;
+}
+
+.intel-reports-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    background: linear-gradient(135deg, #00e1ff, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.intel-reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.intel-report-item {
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.2s;
+}
+
+.intel-report-item:hover {
+    border-color: rgba(0, 225, 255, 0.1);
+    background: rgba(0, 225, 255, 0.03);
+}
+
+.intel-report-date {
+    font-size: 0.7rem;
+    color: #475569;
+    margin-bottom: 4px;
+}
+
+.intel-report-comment {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    word-break: break-word;
+}
+
+.intel-report-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.intel-cat-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    background: rgba(139, 92, 246, 0.12);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.intel-no-reports {
+    text-align: center;
+    padding: 1.5rem;
+    color: #475569;
+    font-size: 0.85rem;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 500px) {
+    .intel-panel {
+        width: 100vw;
+        right: -100vw;
+    }
+
+    .intel-panel-open {
+        right: 0;
+    }
+
+    .intel-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .intel-external-links {
+        flex-direction: column;
+    }
+
+    .intel-trigger-btn {
+        bottom: 16px;
+        right: 16px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+}
