@@ -10,7 +10,7 @@ from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
 
 from tools.threat_watch import __version__
-from tools.threat_watch.routers import events, config, webhooks, ignore_rules
+from tools.threat_watch.routers import events, config, webhooks, ignore_rules, intel
 from tools.threat_watch.database import ThreatEvent
 from tools.threat_watch.models import SystemStatus
 from tools.threat_watch.scheduler import get_last_refresh, DEFAULT_REFRESH_INTERVAL
@@ -55,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(config.router)
     app.include_router(webhooks.router)
     app.include_router(ignore_rules.router)
+    app.include_router(intel.router)
 
     # Dashboard route
     @app.get("/")
