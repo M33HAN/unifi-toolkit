@@ -210,7 +210,9 @@ async def root(request: Request):
             "app_version": app_version,
             "stalker_version": stalker_version,
             "threat_watch_version": threat_watch_version,
-            "pulse_version": pulse_version
+            "pulse_version": pulse_version,
+            "custom_logo_path": get_settings().custom_logo_path,
+            "app_title": get_settings().app_title,
         }
     )
 
