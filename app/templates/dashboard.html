@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Command - LCARS Interface</title>
+    <title>Network Command — MEEHAN Design</title>
     <link rel="icon" type="image/jpeg" href="/static/images/favicon16x16.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -35,20 +35,20 @@
         body.red-alert .red-alert-overlay{display:block}
 
         /* TOP HEADER */
-        .lcars-header{display:flex;align-items:stretch;height:60px;gap:4px;padding:0 4px}
-        .lcars-header .elbow-tl{width:160px;min-width:160px;background:var(--gold);border-radius:0 0 0 40px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700;letter-spacing:2px}
-        .lcars-header .bar-top{flex:1;background:var(--gold);display:flex;align-items:center;padding:0 20px;gap:30px}
-        .lcars-header .bar-top .title{font-size:28px;font-weight:700;color:#000;letter-spacing:4px;text-transform:uppercase}
-        .lcars-header .bar-top .status-items{display:flex;gap:25px;margin-left:auto;align-items:center}
-        .lcars-header .bar-top .status-item{font-size:12px;color:#000;font-weight:700;letter-spacing:1px}
-        .lcars-header .bar-top .status-item .val{font-size:16px;margin-left:4px}
-        .lcars-header .elbow-tr{width:80px;min-width:80px;background:var(--peach);border-radius:0 0 40px 0}
+        .meehan-header{display:flex;align-items:stretch;height:60px;gap:4px;padding:0 4px}
+        .meehan-header .elbow-tl{width:160px;min-width:160px;background:var(--gold);border-radius:0 0 0 40px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700;letter-spacing:2px}
+        .meehan-header .bar-top{flex:1;background:var(--gold);display:flex;align-items:center;padding:0 20px;gap:30px}
+        .meehan-header .bar-top .title{font-size:28px;font-weight:700;color:#000;letter-spacing:4px;text-transform:uppercase}
+        .meehan-header .bar-top .status-items{display:flex;gap:25px;margin-left:auto;align-items:center}
+        .meehan-header .bar-top .status-item{font-size:12px;color:#000;font-weight:700;letter-spacing:1px}
+        .meehan-header .bar-top .status-item .val{font-size:16px;margin-left:4px}
+        .meehan-header .elbow-tr{width:80px;min-width:80px;background:var(--peach);border-radius:0 0 40px 0}
 
         /* MAIN LAYOUT */
-        .lcars-main{display:flex;height:calc(100vh - 64px);gap:4px;padding:4px}
+        .meehan-main{display:flex;height:calc(100vh - 64px);gap:4px;padding:4px}
 
         /* LEFT SIDEBAR */
-        .lcars-sidebar{width:160px;min-width:160px;display:flex;flex-direction:column;gap:3px}
+        .meehan-sidebar{width:160px;min-width:160px;display:flex;flex-direction:column;gap:3px}
         .sidebar-block{padding:8px 12px;font-size:13px;font-weight:700;letter-spacing:2px;color:#000;cursor:pointer;text-transform:uppercase;transition:all .2s;text-align:right;min-height:38px;display:flex;align-items:center;justify-content:flex-end}
         .sidebar-block:hover{filter:brightness(1.3);transform:scale(1.02)}
         .sidebar-block.active{filter:brightness(1.5);box-shadow:0 0 15px rgba(255,255,255,.2)}
@@ -63,7 +63,7 @@
         .sidebar-block:nth-child(9){background:var(--red);flex:1;border-radius:0 0 0 20px;align-items:flex-start;padding-top:10px}
 
         /* CONTENT AREA */
-        .lcars-content{flex:1;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+        .meehan-content{flex:1;display:flex;flex-direction:column;gap:4px;overflow:hidden}
 
         .content-header{display:flex;height:32px;gap:4px}
         .content-header .ch-label{background:var(--blue);color:#000;padding:0 20px;font-size:14px;font-weight:700;letter-spacing:3px;display:flex;align-items:center;border-radius:0 0 0 16px;min-width:200px}
@@ -186,8 +186,8 @@
     <div class="red-alert-overlay"></div>
 
     <!-- TOP HEADER -->
-    <div class="lcars-header">
-        <div class="elbow-tl">LCARS 47</div>
+    <div class="meehan-header">
+        <div class="elbow-tl" style="gap:6px;padding:0 10px"><img src="/static/images/firewire-logo.png" style="height:36px;filter:drop-shadow(0 0 3px rgba(241,167,39,.5))" onerror="this.style.display='none'"> FWN</div>
         <div class="bar-top">
             <div class="title">Network Command</div>
             <div class="status-items">
@@ -195,15 +195,15 @@
                 <div class="status-item">DEVICES <span class="val" id="hdr-dev">---</span></div>
                 <div class="status-item">CLIENTS <span class="val" id="hdr-cli">---</span></div>
                 <div class="status-item">STATUS <span class="val" id="hdr-status">SCANNING</span></div>
-                <div class="status-item">STARDATE <span class="val" id="hdr-stardate">---</span></div>
+                <div class="status-item"><span class="val" id="hdr-stardate">---</span></div>
             </div>
         </div>
         <div class="elbow-tr"></div>
     </div>
 
     <!-- MAIN LAYOUT -->
-    <div class="lcars-main">
-        <div class="lcars-sidebar">
+    <div class="meehan-main">
+        <div class="meehan-sidebar">
             <div class="sidebar-block active" data-view="overview" onclick="switchView('overview')">OVERVIEW</div>
             <div class="sidebar-block" data-view="deckplan" onclick="switchView('deckplan')">DECK PLAN</div>
             <div class="sidebar-block" data-view="topology" onclick="switchView('topology')">TOPOLOGY</div>
@@ -215,7 +215,7 @@
             <div class="sidebar-block" data-view="settings" onclick="switchView('settings')">CONFIG</div>
         </div>
 
-        <div class="lcars-content">
+        <div class="meehan-content">
             <div class="content-header">
                 <div class="ch-label" id="view-label">SYSTEM OVERVIEW</div>
                 <div class="ch-bar"></div>
@@ -236,7 +236,7 @@
 
             <div class="content-footer">
                 <div class="bf-left"></div>
-                <div class="bf-mid">UNITED FEDERATION OF NETWORKS \u2022 M33HAN COMMAND \u2022 LCARS BUILD 47.3</div>
+                <div class="bf-mid">FIREWIRE NETWORKS LTD \u2022 UNITED FEDERATION OF NETWORKS \u2022 M33HAN COMMAND \u2022 MEEHAN DESIGN v3.0</div>
                 <div class="bf-right" id="footer-time">00:00:00</div>
             </div>
         </div>
@@ -266,11 +266,13 @@
 
     function getStardate() {
         const now = new Date();
+        const d = String(now.getDate()).padStart(2,'0');
+        const m = String(now.getMonth()+1).padStart(2,'0');
         const y = now.getFullYear();
-        const start = new Date(y, 0, 1);
-        const diff = now - start;
-        const day = diff / 86400000;
-        return ((y - 2000) * 1000 + day * 2.7397).toFixed(1);
+        const hr = String(now.getHours()).padStart(2,'0');
+        const mn = String(now.getMinutes()).padStart(2,'0');
+        const sc = String(now.getSeconds()).padStart(2,'0');
+        return d + '/' + m + '/' + y + ' ' + hr + ':' + mn + ':' + sc;
     }
 
     function formatUptime(seconds) {
@@ -281,6 +283,36 @@
         if (d > 0) return d + 'd ' + h + 'h ' + m + 'm';
         if (h > 0) return h + 'h ' + m + 'm';
         return m + 'm';
+    }
+
+
+    // Device image map - UniFi product images
+    var DEVICE_IMAGES = {
+        'UAP6MP': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2F25014856-9554-49e0-8e94-7e7e90890ca5%2F123fcc48-1767-4e9a-b498-6d9d66a7bba7.png&q=80&w=64',
+        'U7LR': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2Fbec0c1bb-47da-4152-88a3-0780cfe2c0e8%2Fbf71e8a4-98df-46c6-b094-adc44eceb0b5.png&q=80&w=64',
+        'U7MSH': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2Fe4136dff-4160-41e9-90ac-40ef3e73e70e%2F8f7dd9c5-5a9e-4131-8d1a-45fc9fed26d5.png&q=80&w=64',
+        'UAPA6A9': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2F9e6db999-25ad-421f-b3c8-d44f3cbf1de5%2F86e98d3c-3ac0-4e64-a012-66e1da2a7c3c.png&q=80&w=64',
+        'U7PG2': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2F41634a80-62c0-4c27-b80d-8f6e86fca17a%2F7e3dbba8-37d9-46e9-8e55-e1e9fb0a4e3e.png&q=80&w=64',
+        'USPM16P': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2F0694226c-9791-4d7e-9fb1-d98c91fe3fda%2F2ae66f6d-f093-404a-a498-0aa1e3bf7842.png&q=80&w=64',
+        'USF5P': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2Fdae7de3c-9843-429b-aff0-c2c735d6f07c%2F63b23c94-7891-4d73-bfee-5e7fbb3ff6b8.png&q=80&w=64',
+        'USL16P': 'https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2F1fc53c5d-0aca-4af8-945a-d54e4b0b09a1%2Fd52b6c2b-43fe-4f1c-85d3-2c1b6c7d2c72.png&q=80&w=64'
+    };
+    // Device full names
+    var DEVICE_NAMES = {
+        'UAP6MP': 'U6 Mesh Pro',
+        'U7LR': 'UAP Long Range',
+        'U7MSH': 'UAP AC Mesh',
+        'UAPA6A9': 'U6+',
+        'U7PG2': 'UAP AC Pro',
+        'USPM16P': 'USW Pro Max 16 PoE',
+        'USF5P': 'USW Flex',
+        'USL16P': 'USW 16 PoE'
+    };
+    function getDeviceImg(model) {
+        return DEVICE_IMAGES[model] || '';
+    }
+    function getDeviceName(model) {
+        return DEVICE_NAMES[model] || model;
     }
 
     setInterval(() => {
@@ -331,12 +363,12 @@
             '</div>' +
             '<div class="section-title">ACCESS POINTS</div><div class="device-grid">' +
             aps.map(d =>
-                '<div class="device-card"><div class="dev-icon ' + (d.state===1?'online':'offline') + '">\uD83D\uDCE1</div><div class="dev-info"><div class="dev-name">' + d.name + '</div><div class="dev-model">' + d.model + '</div><div class="dev-status ' + (d.state===1?'online':'offline') + '">\u25CF ' + (d.state===1?'ONLINE \u2014 '+formatUptime(d.uptime):'OFFLINE') + '</div></div></div>'
+                '<div class="device-card"><div class="dev-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:30px;height:30px;object-fit:contain" onerror="this.outerHTML=\'\uD83D\uDCE1\'">':'\uD83D\uDCE1') + '</div><div class="dev-info"><div class="dev-name">' + d.name + '</div><div class="dev-model">' + d.model + '</div><div class="dev-status ' + (d.state===1?'online':'offline') + '">\u25CF ' + (d.state===1?'ONLINE \u2014 '+formatUptime(d.uptime):'OFFLINE') + '</div></div></div>'
             ).join('') +
             '</div>' +
             '<div class="section-title">SWITCHES</div><div class="device-grid">' +
             switches.map(d =>
-                '<div class="device-card"><div class="dev-icon ' + (d.state===1?'online':'offline') + '">\uD83D\uDD0C</div><div class="dev-info"><div class="dev-name">' + d.name + '</div><div class="dev-model">' + d.model + '</div><div class="dev-status ' + (d.state===1?'online':'offline') + '">\u25CF ' + (d.state===1?'ONLINE \u2014 '+formatUptime(d.uptime):'OFFLINE') + '</div></div></div>'
+                '<div class="device-card"><div class="dev-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:30px;height:30px;object-fit:contain" onerror="this.outerHTML=\'\uD83D\uDD0C\'">':'\uD83D\uDD0C') + '</div><div class="dev-info"><div class="dev-name">' + d.name + '</div><div class="dev-model">' + d.model + '</div><div class="dev-status ' + (d.state===1?'online':'offline') + '">\u25CF ' + (d.state===1?'ONLINE \u2014 '+formatUptime(d.uptime):'OFFLINE') + '</div></div></div>'
             ).join('') +
             '</div>' +
             '<div class="section-title">SYSTEM DIAGNOSTICS</div><div class="overview-grid">' +
@@ -482,9 +514,9 @@
             '</div></div>' +
             '<div class="section-title" style="margin-top:20px">SYSTEM INFORMATION</div>' +
             '<div style="background:#0a0a1a;border:1px solid #333;padding:15px;font-family:monospace;font-size:12px">' +
-            '<div style="color:var(--gold)">LCARS NETWORK COMMAND v2.0</div>' +
+            '<div style="color:var(--gold)">MEEHAN NETWORK COMMAND v2.0</div>' +
             '<div style="color:#666;margin-top:5px">Based on UI Toolkit for UniFi</div>' +
-            '<div style="color:#666">Modified by M33HAN \u2022 LCARS Interface</div>' +
+            '<div style="color:#666">Modified by M33HAN \u2022 MEEHAN Interface</div>' +
             '<div style="color:var(--green);margin-top:10px">Status: Connected</div></div>';
     }
 
@@ -519,7 +551,7 @@
         // Background
         svg += '<rect width="1200" height="650" fill="url(#grid)"/>';
 
-        // LCARS frame
+        // MEEHAN frame
         svg += '<rect x="10" y="8" width="100" height="20" rx="10" fill="#f1a727"/>';
         svg += '<text x="60" y="22" text-anchor="middle" font-family="Antonio,sans-serif" font-size="11" fill="#000" font-weight="700">M33HAN CLASS</text>';
         svg += '<rect x="120" y="8" width="400" height="20" rx="10" fill="#9999ff"/>';
@@ -603,7 +635,7 @@
         svg += '<text x="30" y="70" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">CLIENTS: ' + (networkData.system.num_clients||0) + '</text>';
         svg += '<text x="30" y="85" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">APs: ' + aps.length + '</text>';
         svg += '<text x="30" y="100" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">SWITCHES: ' + sws.length + '</text>';
-        svg += '<text x="1170" y="55" text-anchor="end" font-family="Antonio,sans-serif" font-size="9" fill="#9999ff" opacity=".6" letter-spacing="2">LCARS SCHEMATIC</text>';
+        svg += '<text x="1170" y="55" text-anchor="end" font-family="Antonio,sans-serif" font-size="9" fill="#9999ff" opacity=".6" letter-spacing="2">MEEHAN SCHEMATIC</text>';
         svg += '<text x="1170" y="70" text-anchor="end" font-family="Antonio,sans-serif" font-size="9" fill="#9999ff" opacity=".6" letter-spacing="2">VIEW: TOP-DOWN</text>';
 
         // Data blocks
@@ -653,7 +685,7 @@
         svg += '<ellipse cx="900" cy="100" rx="200" ry="80" fill="rgba(68,85,255,.03)"/>';
         svg += '<ellipse cx="300" cy="500" rx="150" ry="60" fill="rgba(204,153,204,.03)"/>';
 
-        // LCARS corner brackets
+        // MEEHAN corner brackets
         svg += '<rect x="5" y="5" width="80" height="3" rx="1.5" fill="#f1a727"/><rect x="5" y="5" width="3" height="40" rx="1.5" fill="#f1a727"/>';
         svg += '<rect x="1115" y="5" width="80" height="3" rx="1.5" fill="#9999ff"/><rect x="1192" y="5" width="3" height="40" rx="1.5" fill="#9999ff"/>';
         svg += '<rect x="5" y="642" width="80" height="3" rx="1.5" fill="#cc99cc"/><rect x="5" y="605" width="3" height="40" rx="1.5" fill="#cc99cc"/>';
@@ -756,7 +788,7 @@
         var circ = 2 * Math.PI * 20;
         var offset = circ - (pct/100) * circ;
         var h = '<div class="modern-wrapper" id="modern-overlay">';
-        h += '<div class="modern-topbar"><div class="logo">NETCMD<span> // FEDERATION</span></div>';
+        h += '<div class="modern-topbar"><div class="logo">NETCMD<span> // FIREWIRE NETWORKS</span></div>';
         h += '<div class="nav-pills"><div class="nav-pill active">DASHBOARD</div><div class="nav-pill">FLEET</div><div class="nav-pill">SIGNALS</div><div class="nav-pill">DEFENSE</div></div>';
         h += '<div class="status-bar"><div class="status-badge">GATEWAY <span class="sv">' + sys.gateway_model + '</span></div>';
         h += '<div class="status-badge">NODES <span class="sv">' + devices.length + '</span></div>';
@@ -773,21 +805,21 @@
         h += '</div><div class="modern-main">';
         h += '<div class="modern-section">Wireless Arrays</div><div class="holo-grid">';
         aps.forEach(function(d) {
-            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">\uD83D\uDCE1</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
+            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:32px;height:32px;object-fit:contain" onerror="this.outerHTML=\'\uD83D\uDCE1\'">':'\uD83D\uDCE1') + '</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
             h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
             if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
             h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Access Point</div></div></div></div>';
         });
         h += '</div><div class="modern-section">Core Switches</div><div class="holo-grid">';
         sws.forEach(function(d) {
-            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">\u26A1</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
+            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:32px;height:32px;object-fit:contain" onerror="this.outerHTML=\'\u26A1\'">':'\u26A1') + '</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
             h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
             if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
             h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Switch</div></div></div></div>';
         });
         h += '</div></div></div>';
-        h += '<div class="modern-footer"><div class="mf-dot"></div><span>NETWORK COMMAND INTERFACE v3.0 &nbsp;|&nbsp; M33HAN &nbsp;|&nbsp; STARDATE ' + getStardate() + '</span><span style="margin-left:auto">FEDERATION NETWORK OPERATIONS</span></div>';
-        h += '<button class="modern-back" onclick="closeModern()">\u25C4 LCARS MODE</button></div>';
+        h += '<div class="modern-footer"><div class="mf-dot"></div><span>NETWORK COMMAND INTERFACE v3.0 &nbsp;|&nbsp; M33HAN &nbsp;|&nbsp; STARDATE ' + getStardate() + '</span><span style="margin-left:auto">FIREWIRE NETWORKS LTD</span></div>';
+        h += '<button class="modern-back" onclick="closeModern()">\u25C4 MEEHAN MODE</button></div>';
         document.body.insertAdjacentHTML('beforeend', h);
     }
 
