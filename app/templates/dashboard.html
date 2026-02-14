@@ -213,6 +213,7 @@
             <div class="sidebar-block" data-view="pulse" onclick="switchView('pulse')">NET PULSE</div>
             <div class="sidebar-block" data-view="modern" onclick="switchView('modern')">MODERN UI</div>
             <div class="sidebar-block" data-view="settings" onclick="switchView('settings')">CONFIG</div>
+            <div class="sidebar-block" data-view="credits" onclick="switchView('credits')">CREDITS</div>
         </div>
 
         <div class="meehan-content">
@@ -232,6 +233,7 @@
                 <div class="view-panel" id="panel-pulse"></div>
                 <div class="view-panel" id="panel-modern"></div>
                 <div class="view-panel" id="panel-settings"></div>
+            <div id="panel-credits" class="content-panel" style="display:none"></div>
             </div>
 
             <div class="content-footer">
@@ -255,7 +257,8 @@
             overview:['SYSTEM OVERVIEW','ACTIVE'],deckplan:['VESSEL SCHEMATIC','DECK 1'],
             topology:['NETWORK TOPOLOGY','LIVE'],devices:['DEVICE REGISTRY','ALL SYSTEMS'],
             stalker:['WI-FI TRACKING','MONITORING'],threats:['THREAT ANALYSIS','SHIELDS UP'],
-            pulse:['NETWORK PULSE','REAL-TIME'],modern:['MODERN INTERFACE','NEXT GEN'],settings:['CONFIGURATION','AUTHORIZED']
+            pulse:['NETWORK PULSE','REAL-TIME'],modern:['MODERN INTERFACE','NEXT GEN'],settings:['CONFIGURATION','AUTHORIZED'],
+            credits:['CREDITS & ATTRIBUTION','ACKNOWLEDGMENTS']
         };
         document.getElementById('view-label').textContent = labels[view][0];
         document.getElementById('view-info').textContent = labels[view][1];
@@ -338,6 +341,16 @@
             const resp = await fetch('/api/system-status');
             const data = await resp.json();
             networkData = data;
+            try {
+                const [apResp, clientResp, healthResp] = await Promise.all([
+                    fetch('/pulse/api/stats/aps'),
+                    fetch('/pulse/api/stats/clients'),
+                    fetch('/pulse/api/stats/health')
+                ]);
+                window._pulseAPs = await apResp.json();
+                window._pulseClients = await clientResp.json();
+                window._pulseHealth = await healthResp.json();
+            } catch(pe) { console.log('Pulse API optional:', pe); }
             const sys = data.system;
             const devices = sys.devices || [];
             const online = devices.filter(d => d.state === 1).length;
@@ -357,6 +370,8 @@
             buildThreats(sys);
             buildPulse(devices, sys);
             buildSettings();
+            buildCredits();
+            enhancePulseData();
         } catch(e) {
             document.getElementById('panel-overview').innerHTML = '<div style="color:var(--red);padding:40px;font-size:18px;">\u26A0 CONNECTION LOST<br><br><span style="font-size:13px;color:#888;">Unable to reach /api/system-status. Check your UniFi connection.<br><br><button onclick="location.reload()" style="background:var(--gold);color:#000;border:none;padding:10px 25px;font-family:var(--heading);font-weight:700;cursor:pointer;">RETRY</button></span></div>';
         }
@@ -543,6 +558,78 @@
             alert('Configuration saved. Reloading...');
             location.reload();
         } catch(e) { alert('Error saving: ' + e.message); }
+    }
+
+
+    // ============ BUILD CREDITS & ATTRIBUTION ============
+    function buildCredits() {
+        var panel = document.getElementById('panel-credits');
+        if (!panel) return;
+        var health = window._pulseHealth || {};
+        var healthSection = '';
+        if (health.wlan_status || health.lan_status) {
+            var items = [{label:'WLAN',status:health.wlan_status,reason:health.wlan_reason},{label:'LAN',status:health.lan_status,reason:health.lan_reason},{label:'WAN',status:health.wan_status,reason:health.wan_reason}];
+            healthSection = '<div style="margin-top:30px;padding:20px;background:rgba(0,180,255,0.05);border:1px solid rgba(0,180,255,0.15);border-radius:12px">' +
+                '<h3 style="color:#00b4ff;margin:0 0 15px 0;font-size:14px;letter-spacing:2px">NETWORK HEALTH STATUS</h3>' +
+                '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px">' +
+                items.map(function(item) {
+                    var color = item.status === 'ok' ? '#0f8' : item.status === 'warning' ? '#fa0' : '#f55';
+                    var bc = item.status === 'ok' ? 'rgba(0,255,136,0.3)' : item.status === 'warning' ? 'rgba(255,170,0,0.3)' : 'rgba(255,80,80,0.3)';
+                    return '<div style="text-align:center;padding:15px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid ' + bc + '"><div style="font-size:11px;color:#888;letter-spacing:1px">' + item.label + '</div><div style="font-size:18px;font-weight:bold;color:' + color + ';margin:5px 0">' + (item.status || 'N/A').toUpperCase() + '</div><div style="font-size:10px;color:#666">' + (item.reason || '') + '</div></div>';
+                }).join('') + '</div></div>';
+        }
+        panel.innerHTML = '<div style="max-width:800px;margin:0 auto;padding:40px 20px;text-align:center">' +
+            '<div style="margin-bottom:40px"><div style="font-size:48px;margin-bottom:10px">\u2727</div>' +
+            '<h1 style="color:#00b4ff;font-size:28px;font-weight:300;letter-spacing:6px;margin:0">CREDITS & ATTRIBUTION</h1>' +
+            '<div style="width:200px;height:1px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);margin:15px auto"></div></div>' +
+            '<div style="background:rgba(0,180,255,0.08);border:1px solid rgba(0,180,255,0.2);border-radius:16px;padding:40px;margin-bottom:30px;backdrop-filter:blur(10px)">' +
+            '<div style="font-size:13px;color:#00b4ff;letter-spacing:3px;margin-bottom:20px">ORIGINAL PROJECT</div>' +
+            '<h2 style="color:#fff;font-size:24px;font-weight:400;margin:0 0 10px 0">UI Toolkit for UniFi</h2>' +
+            '<p style="color:#aaa;font-size:14px;line-height:1.6;margin:0 0 25px 0">This project is a fork of the original <strong style="color:#00b4ff">UI Toolkit for UniFi</strong> created by <strong style="color:#0f8">Crosstalk Solutions</strong>. We extend our deepest gratitude for building this incredible foundation and releasing it under the MIT license, enabling the community to innovate and build upon their work.</p>' +
+            '<div style="font-size:12px;color:#888;padding:15px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:monospace;margin-bottom:25px">MIT License \u00A9 Crosstalk Solutions<br>Original Repository: github.com/Crosstalk-Solutions/unifi-toolkit</div>' +
+            '<div style="font-size:13px;color:#00b4ff;letter-spacing:3px;margin-bottom:20px">CONNECT WITH CROSSTALK SOLUTIONS</div>' +
+            '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px">' +
+            '<a href="https://www.crosstalksolutions.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(0,180,255,0.1);border:1px solid rgba(0,180,255,0.3);border-radius:8px;color:#00b4ff;text-decoration:none;font-size:13px">\u{1F310} Website</a>' +
+            '<a href="https://youtube.com/crosstalksolutions" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(255,0,0,0.08);border:1px solid rgba(255,0,0,0.3);border-radius:8px;color:#ff4444;text-decoration:none;font-size:13px">\u25B6 YouTube</a>' +
+            '<a href="https://twitter.com/crosstalksol" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(29,155,240,0.08);border:1px solid rgba(29,155,240,0.3);border-radius:8px;color:#1d9bf0;text-decoration:none;font-size:13px">\u{1D54F} Twitter/X</a>' +
+            '<a href="https://www.linkedin.com/company/crosstalk-solutions/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(0,119,181,0.08);border:1px solid rgba(0,119,181,0.3);border-radius:8px;color:#0077b5;text-decoration:none;font-size:13px">\u{1F4BC} LinkedIn</a>' +
+            '<a href="https://github.com/Crosstalk-Solutions/unifi-toolkit" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;text-decoration:none;font-size:13px">\u2B50 GitHub (133+ Stars)</a></div></div>' +
+            '<div style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:16px;padding:30px;margin-bottom:30px">' +
+            '<div style="font-size:13px;color:#0f8;letter-spacing:3px;margin-bottom:15px">MEEHAN DESIGN FORK</div>' +
+            '<p style="color:#aaa;font-size:14px;line-height:1.6;margin:0 0 15px 0"><strong style="color:#0f8">MEEHAN Design v3.0</strong> is a customized fork featuring a Star Trek-inspired LCARS interface, real-time network monitoring, threat analysis, Wi-Fi tracking, and an advanced modern UI overlay.</p>' +
+            '<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap">' +
+            ['LCARS Interface','Threat Analysis','Wi-Fi Stalker','Network Pulse','Modern UI','Deck Plans'].map(function(f) { return '<div style="padding:10px 15px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:12px;color:#888"><span style="color:#0f8">\u2713</span> ' + f + '</div>'; }).join('') +
+            '</div></div>' + healthSection +
+            '<div style="margin-top:30px;padding:20px;border-top:1px solid rgba(255,255,255,0.05)"><p style="color:#555;font-size:12px;line-height:1.8;margin:0">FIREWIRE NETWORKS LTD \u2022 UNITED FEDERATION OF NETWORKS \u2022 M33HAN COMMAND<br>Built with \u2764 for the network engineering community<br><span style="color:#333">Powered by UniFi \u2022 Python \u2022 FastAPI</span></p></div></div>';
+    }
+
+
+    // ============ ENHANCE WITH PULSE DATA ============
+    function enhancePulseData() {
+        var aps = window._pulseAPs;
+        var clients = window._pulseClients;
+        var health = window._pulseHealth;
+        if (!aps && !clients && !health) return;
+        var overviewPanel = document.getElementById('panel-overview');
+        if (overviewPanel && health) {
+            var healthBar = document.createElement('div');
+            healthBar.style.cssText = 'margin-bottom:20px;padding:15px;background:rgba(0,0,0,0.3);border-radius:10px;display:flex;justify-content:space-around;flex-wrap:wrap;gap:10px';
+            var items = [{label:'WLAN',status:health.wlan_status,reason:health.wlan_reason},{label:'LAN',status:health.lan_status,reason:health.lan_reason},{label:'WAN',status:health.wan_status,reason:health.wan_reason},{label:'WIRELESS',value:health.wireless_clients||'-'},{label:'WIRED',value:health.wired_clients||'-'},{label:'TOTAL',value:health.total_clients||'-'}];
+            healthBar.innerHTML = items.map(function(item) { if (item.status !== undefined) { var color = item.status === 'ok' ? '#0f8' : item.status === 'warning' ? '#fa0' : '#f55'; return '<div style="text-align:center;min-width:80px"><div style="font-size:10px;color:#666;letter-spacing:1px">' + item.label + '</div><div style="font-size:14px;font-weight:bold;color:' + color + ';margin:3px 0">' + (item.status||'').toUpperCase() + '</div><div style="font-size:9px;color:#555">' + (item.reason||'') + '</div></div>'; } else { return '<div style="text-align:center;min-width:60px"><div style="font-size:10px;color:#666;letter-spacing:1px">' + item.label + '</div><div style="font-size:18px;font-weight:bold;color:#00b4ff;margin:3px 0">' + item.value + '</div></div>'; } }).join('');
+            overviewPanel.insertBefore(healthBar, overviewPanel.firstChild);
+        }
+        if (overviewPanel && aps && aps.access_points) {
+            var apSection = document.createElement('div');
+            apSection.style.cssText = 'margin-top:20px;padding:20px;background:rgba(0,180,255,0.05);border:1px solid rgba(0,180,255,0.15);border-radius:12px';
+            apSection.innerHTML = '<h3 style="color:#00b4ff;margin:0 0 15px 0;font-size:13px;letter-spacing:2px">ACCESS POINT TELEMETRY</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">' + aps.access_points.map(function(ap) { var sat = ap.satisfaction || 0; var sc = sat >= 90 ? '#0f8' : sat >= 70 ? '#fa0' : '#f55'; return '<div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border-left:3px solid ' + sc + '"><div style="font-size:12px;color:#fff;font-weight:500">' + (ap.name||ap.mac||'Unknown AP') + '</div><div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:11px;color:#888">Satisfaction</span><span style="font-size:13px;font-weight:bold;color:' + sc + '">' + sat + '%</span></div><div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:11px;color:#888">Clients</span><span style="font-size:13px;color:#00b4ff">' + (ap.num_clients||0) + '</span></div></div>'; }).join('') + '</div>';
+            overviewPanel.appendChild(apSection);
+        }
+        if (overviewPanel && clients && clients.top_clients) {
+            var cs = document.createElement('div');
+            cs.style.cssText = 'margin-top:15px;padding:20px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.12);border-radius:12px';
+            cs.innerHTML = '<h3 style="color:#0f8;margin:0 0 15px 0;font-size:13px;letter-spacing:2px">TOP CONNECTED CLIENTS</h3><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><th style="text-align:left;padding:8px;color:#888;font-weight:500">Name</th><th style="text-align:left;padding:8px;color:#888;font-weight:500">IP</th><th style="text-align:left;padding:8px;color:#888;font-weight:500">SSID</th><th style="text-align:right;padding:8px;color:#888;font-weight:500">Signal</th><th style="text-align:right;padding:8px;color:#888;font-weight:500">Type</th></tr>' + clients.top_clients.slice(0,10).map(function(cl) { var rssi = cl.rssi||0; var rc = rssi >= -50 ? '#0f8' : rssi >= -70 ? '#fa0' : '#f55'; return '<tr style="border-bottom:1px solid rgba(255,255,255,0.03)"><td style="padding:8px;color:#ddd">' + (cl.name||cl.hostname||'Unknown') + '</td><td style="padding:8px;color:#888;font-family:monospace;font-size:11px">' + (cl.ip||'N/A') + '</td><td style="padding:8px;color:#00b4ff">' + (cl.ssid||(cl.is_wired?'Wired':'N/A')) + '</td><td style="padding:8px;text-align:right;color:' + rc + '">' + (cl.is_wired?'-':rssi+' dBm') + '</td><td style="padding:8px;text-align:right"><span style="padding:2px 8px;border-radius:4px;font-size:10px;background:' + (cl.is_wired?'rgba(0,180,255,0.15);color:#00b4ff':'rgba(0,255,136,0.15);color:#0f8') + '">' + (cl.is_wired?'WIRED':'WIFI') + '</span></td></tr>'; }).join('') + '</table></div>';
+            overviewPanel.appendChild(cs);
+        }
     }
 
     // ============ BUILD DECK PLAN (Starship Schematic) ============
