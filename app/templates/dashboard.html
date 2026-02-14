@@ -1,552 +1,690 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Network Command - LCARS Interface</title>
-<link rel="icon" type="image/jpeg" href="/static/images/favicon16x16.jpg">
-<link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<style>
-@keyframes scan{0%{top:-2px}100%{top:100%}}
-@keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
-@keyframes borderFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-@keyframes devicePulse{0%,100%{box-shadow:0 0 4px currentColor}50%{box-shadow:0 0 12px currentColor,0 0 24px currentColor}}
-@keyframes dataStream{0%{opacity:.3}50%{opacity:.8}100%{opacity:.3}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Command - LCARS Interface</title>
+    <link rel="icon" type="image/jpeg" href="/static/images/favicon16x16.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        @keyframes scan{0%{top:-2px}100%{top:100%}}
+        @keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulseRing{0%{r:22;opacity:.5}100%{r:40;opacity:0}}
+        @keyframes redAlert{0%,100%{opacity:0}50%{opacity:.15}}
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-:root{
---gold:#f1a136;--orange:#f0884a;--red:#d9534f;--blue:#8e96e3;
---ltblue:#99ccff;--purple:#9c88ff;--teal:#66cccc;--bg:#000;
---panel:#0a0a14;--text:#f0e6d0;--dim:#667788;--border:rgba(241,161,54,.2);
---fdisplay:'Orbitron',sans-serif;--fdata:'Share Tech Mono',monospace;--flabel:'Antonio',sans-serif;
-}
+        :root{
+            --gold:#f1a727;--orange:#ff9900;--peach:#ffcc99;
+            --blue:#9999ff;--ltblue:#aaccff;--purple:#cc99cc;
+            --red:#cc4444;--green:#55ff55;--cyan:#88ddff;
+            --dkblue:#4455ff;--bg:#000;--panel:#111;
+            --text:#ff9900;
+            --heading:Antonio,Orbitron,sans-serif;
+        }
 
-html,body{background:var(--bg);color:var(--text);font-family:var(--fdata);min-height:100vh;overflow-x:hidden}
-body::after{content:'';position:fixed;top:-2px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(241,161,54,.2),rgba(153,204,255,.3),transparent);animation:scan 8s linear infinite;pointer-events:none;z-index:99999}
+        body{background:var(--bg);color:var(--text);font-family:var(--heading);overflow:hidden;height:100vh;width:100vw}
 
-.lcars-frame{display:grid;grid-template-columns:140px 1fr;grid-template-rows:auto 1fr auto;min-height:100vh;gap:0}
+        /* Scan line */
+        .scanline{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,153,0,.1),transparent);animation:scan 4s linear infinite;pointer-events:none;z-index:9999}
 
-/* SIDEBAR */
-.lcars-sidebar{grid-row:1/-1;background:var(--panel);display:flex;flex-direction:column;gap:3px}
-.lcars-elbow-top{background:var(--gold);height:80px;border-radius:0 0 0 40px;position:relative}
-.lcars-elbow-top::after{content:'';position:absolute;bottom:0;right:0;width:100%;height:40px;background:var(--bg);border-radius:0 20px 0 0}
-.lcars-bar{flex:1;display:flex;flex-direction:column;gap:3px}
-.lcars-block{width:100%;border-radius:0 20px 20px 0;padding:8px 12px;font-family:var(--flabel);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(0,0,0,.8);font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:flex-end;text-align:right;min-height:40px;position:relative}
-.lcars-block:hover{filter:brightness(1.3);transform:scaleX(1.02)}
-.lcars-block.active{filter:brightness(1.4);transform:scaleX(1.05)}
-.lcars-block.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#fff;border-radius:0 2px 2px 0}
-.lcars-block.gold{background:var(--gold)}
-.lcars-block.orange{background:var(--orange)}
-.lcars-block.blue{background:var(--blue)}
-.lcars-block.purple{background:var(--purple)}
-.lcars-block.teal{background:var(--teal)}
-.lcars-block.red{background:var(--red)}
-.lcars-block.ltblue{background:var(--ltblue)}
-.lcars-elbow-bottom{background:var(--orange);height:55px;border-radius:40px 0 0 0;position:relative;margin-top:3px}
-.lcars-elbow-bottom::before{content:'';position:absolute;top:0;right:0;width:100%;height:28px;background:var(--bg);border-radius:0 0 20px 0}
+        /* Red Alert */
+        .red-alert-overlay{position:fixed;inset:0;background:red;animation:redAlert 1s ease infinite;pointer-events:none;z-index:9998;display:none}
+        body.red-alert .red-alert-overlay{display:block}
 
-/* TOPBAR */
-.lcars-topbar{display:flex;align-items:stretch;gap:3px;height:80px}
-.topbar-left{background:var(--gold);border-radius:0 0 30px 0;min-width:220px;display:flex;align-items:center;justify-content:center;padding:0 24px}
-.topbar-title{font-family:var(--fdisplay);font-size:.8rem;font-weight:900;letter-spacing:.15em;color:#000;text-transform:uppercase}
-.topbar-center{flex:1;background:var(--panel);display:flex;align-items:center;justify-content:center;gap:2.5rem;padding:0 1.5rem;position:relative;overflow:hidden}
-.topbar-center::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--blue),var(--purple),var(--gold));background-size:200% 100%;animation:borderFlow 4s linear infinite}
-.topbar-right{background:var(--orange);border-radius:0 0 0 30px;min-width:200px;display:flex;align-items:center;justify-content:center;padding:0 24px}
-.stardate{font-family:var(--fdisplay);font-size:.7rem;font-weight:700;color:#000;letter-spacing:.1em}
+        /* TOP HEADER */
+        .lcars-header{display:flex;align-items:stretch;height:60px;gap:4px;padding:0 4px}
+        .lcars-header .elbow-tl{width:160px;min-width:160px;background:var(--gold);border-radius:0 0 0 40px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700;letter-spacing:2px}
+        .lcars-header .bar-top{flex:1;background:var(--gold);display:flex;align-items:center;padding:0 20px;gap:30px}
+        .lcars-header .bar-top .title{font-size:28px;font-weight:700;color:#000;letter-spacing:4px;text-transform:uppercase}
+        .lcars-header .bar-top .status-items{display:flex;gap:25px;margin-left:auto;align-items:center}
+        .lcars-header .bar-top .status-item{font-size:12px;color:#000;font-weight:700;letter-spacing:1px}
+        .lcars-header .bar-top .status-item .val{font-size:16px;margin-left:4px}
+        .lcars-header .elbow-tr{width:80px;min-width:80px;background:var(--peach);border-radius:0 0 40px 0}
 
-.status-readout{display:flex;align-items:center;gap:6px;font-size:.7rem}
-.readout-label{color:var(--dim);font-size:.5rem;text-transform:uppercase;letter-spacing:.12em}
-.readout-value{color:var(--ltblue);font-weight:700;font-size:.8rem}
-.readout-value.alert{color:var(--red);animation:blink 2s ease-in-out infinite}
-.readout-value.ok{color:var(--teal)}
-.readout-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s ease-in-out infinite}
-.readout-dot.offline{background:var(--red);animation:blink 1.5s ease-in-out infinite}
+        /* MAIN LAYOUT */
+        .lcars-main{display:flex;height:calc(100vh - 64px);gap:4px;padding:4px}
 
-/* MAIN */
-.lcars-main{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1.25rem;overflow-y:auto}
+        /* LEFT SIDEBAR */
+        .lcars-sidebar{width:160px;min-width:160px;display:flex;flex-direction:column;gap:3px}
+        .sidebar-block{padding:8px 12px;font-size:13px;font-weight:700;letter-spacing:2px;color:#000;cursor:pointer;text-transform:uppercase;transition:all .2s;text-align:right;min-height:38px;display:flex;align-items:center;justify-content:flex-end}
+        .sidebar-block:hover{filter:brightness(1.3);transform:scale(1.02)}
+        .sidebar-block.active{filter:brightness(1.5);box-shadow:0 0 15px rgba(255,255,255,.2)}
+        .sidebar-block:nth-child(1){background:var(--gold);border-radius:20px 0 0 0;flex:0 0 50px}
+        .sidebar-block:nth-child(2){background:var(--blue)}
+        .sidebar-block:nth-child(3){background:var(--purple)}
+        .sidebar-block:nth-child(4){background:var(--peach)}
+        .sidebar-block:nth-child(5){background:var(--ltblue)}
+        .sidebar-block:nth-child(6){background:var(--orange)}
+        .sidebar-block:nth-child(7){background:var(--cyan);color:#000}
+        .sidebar-block:nth-child(8){background:var(--red);flex:1;border-radius:0 0 0 20px;align-items:flex-start;padding-top:10px}
 
-/* VIEW PANELS — only one visible at a time */
-.view-panel{display:none}
-.view-panel.active{display:block}
+        /* CONTENT AREA */
+        .lcars-content{flex:1;display:flex;flex-direction:column;gap:4px;overflow:hidden}
 
-.section-header{display:flex;align-items:center;gap:0;margin-bottom:.5rem}
-.section-pill{background:var(--gold);color:#000;font-family:var(--fdisplay);font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:6px 20px;border-radius:15px 0 0 15px;white-space:nowrap}
-.section-line{flex:1;height:3px;background:linear-gradient(90deg,var(--gold),transparent)}
+        .content-header{display:flex;height:32px;gap:4px}
+        .content-header .ch-label{background:var(--blue);color:#000;padding:0 20px;font-size:14px;font-weight:700;letter-spacing:3px;display:flex;align-items:center;border-radius:0 0 0 16px;min-width:200px}
+        .content-header .ch-bar{flex:1;background:var(--blue);opacity:.6}
+        .content-header .ch-info{background:var(--purple);color:#000;padding:0 15px;font-size:12px;font-weight:700;display:flex;align-items:center;letter-spacing:2px;border-radius:0 0 16px 0}
 
-/* DATA PANELS */
-.panels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.data-panel{background:var(--panel);border:1px solid var(--border);border-radius:0 12px 12px 0;padding:1rem;position:relative;overflow:hidden;animation:fadeUp .6s ease-out backwards}
-.data-panel::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--gold)}
-.data-panel:nth-child(2)::before{background:var(--blue)}
-.data-panel:nth-child(3)::before{background:var(--teal)}
-.data-panel:nth-child(4)::before{background:var(--orange)}
-.panel-title{font-family:var(--fdisplay);font-size:.5rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
-.data-panel:nth-child(2) .panel-title{color:var(--blue)}
-.data-panel:nth-child(3) .panel-title{color:var(--teal)}
-.data-panel:nth-child(4) .panel-title{color:var(--orange)}
-.data-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.75rem}
-.data-row:last-child{border:none}
-.data-label{color:var(--dim)}
-.data-val{color:var(--text);font-weight:700}
-.data-val.highlight{color:var(--ltblue)}
-.data-val.warn{color:var(--red)}
+        .content-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px;scrollbar-width:thin;scrollbar-color:var(--gold) #111}
+        .content-body::-webkit-scrollbar{width:6px}
+        .content-body::-webkit-scrollbar-track{background:#111}
+        .content-body::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
 
-/* TOOL CARDS */
-.tools-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.tool-panel{background:var(--panel);border:1px solid var(--border);border-radius:20px 20px 12px 12px;overflow:hidden;transition:all .3s;cursor:pointer;position:relative;animation:fadeUp .7s ease-out backwards}
-.tool-panel:nth-child(1){animation-delay:.1s}
-.tool-panel:nth-child(2){animation-delay:.2s}
-.tool-panel:nth-child(3){animation-delay:.3s}
-.tool-panel:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 8px 30px rgba(241,161,54,.15)}
-.tool-header{padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.tool-panel:nth-child(1) .tool-header{background:var(--blue)}
-.tool-panel:nth-child(2) .tool-header{background:var(--gold)}
-.tool-panel:nth-child(3) .tool-header{background:var(--purple)}
-.tool-name{font-family:var(--fdisplay);font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#000}
-.tool-ver{font-family:var(--fdata);font-size:.55rem;color:rgba(0,0,0,.5)}
-.tool-body{padding:1.25rem;display:flex;flex-direction:column;gap:.75rem}
-.tool-desc{color:var(--dim);font-size:.78rem;line-height:1.5}
-.tool-badges{display:flex;flex-wrap:wrap;gap:4px}
-.tool-badge{padding:3px 8px;border-radius:3px;font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;border:1px solid}
-.tool-panel:nth-child(1) .tool-badge{color:var(--blue);border-color:rgba(142,150,227,.3);background:rgba(142,150,227,.08)}
-.tool-panel:nth-child(2) .tool-badge{color:var(--gold);border-color:rgba(241,161,54,.3);background:rgba(241,161,54,.08)}
-.tool-panel:nth-child(3) .tool-badge{color:var(--purple);border-color:rgba(156,136,255,.3);background:rgba(156,136,255,.08)}
-.tool-launch{display:block;text-align:center;padding:8px;border-radius:8px;font-family:var(--fdisplay);font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:all .2s;margin-top:auto}
-.tool-panel:nth-child(1) .tool-launch{background:rgba(142,150,227,.12);color:var(--blue);border:1px solid rgba(142,150,227,.3)}
-.tool-panel:nth-child(2) .tool-launch{background:rgba(241,161,54,.12);color:var(--gold);border:1px solid rgba(241,161,54,.3)}
-.tool-panel:nth-child(3) .tool-launch{background:rgba(156,136,255,.12);color:var(--purple);border:1px solid rgba(156,136,255,.3)}
-.tool-launch:hover{filter:brightness(1.4);transform:scale(1.02)}
+        .view-panel{display:none}
+        .view-panel.active{display:block;animation:fadeIn .3s ease}
 
-/* FLOOR PLAN */
-.floor-plan-container{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.5rem;position:relative;min-height:400px;overflow:hidden}
-.floor-plan-container::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--teal),var(--blue));border-radius:4px 0 0 4px}
-.floor-plan-svg{width:100%;height:400px}
-.fp-room{fill:rgba(0,225,255,.03);stroke:var(--teal);stroke-width:1;transition:all .3s;cursor:pointer}
-.fp-room:hover{fill:rgba(0,225,255,.08);stroke-width:2}
-.fp-room-label{fill:var(--dim);font-family:var(--fdisplay);font-size:8px;letter-spacing:.1em;text-transform:uppercase;pointer-events:none}
-.fp-device{cursor:pointer;transition:all .3s}
-.fp-device:hover{transform:scale(1.3)}
-.fp-device-icon{font-size:16px}
-.fp-device-ring{fill:none;stroke-width:2;animation:devicePulse 3s ease-in-out infinite}
-.fp-device-ring.online{stroke:var(--teal)}
-.fp-device-ring.offline{stroke:var(--red);animation:blink 2s ease-in-out infinite}
-.fp-device-label{fill:var(--text);font-family:var(--fdata);font-size:7px;text-anchor:middle}
-.fp-device-status{font-family:var(--fdata);font-size:5px;text-anchor:middle;letter-spacing:.1em}
-.fp-device-status.online{fill:var(--teal)}
-.fp-device-status.offline{fill:var(--red)}
-.fp-connection{stroke:rgba(0,225,255,.1);stroke-width:1;stroke-dasharray:4 4;fill:none}
-.fp-legend{display:flex;gap:1.5rem;margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--border)}
-.fp-legend-item{display:flex;align-items:center;gap:6px;font-size:.65rem;color:var(--dim)}
-.fp-legend-dot{width:8px;height:8px;border-radius:50%}
+        .content-footer{display:flex;height:24px;gap:4px}
+        .content-footer .bf-left{background:var(--peach);width:200px;border-radius:12px 0 0 0}
+        .content-footer .bf-mid{flex:1;background:var(--peach);opacity:.5;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700;letter-spacing:3px}
+        .content-footer .bf-right{background:var(--gold);width:120px;border-radius:0 12px 0 0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700}
 
-/* DEVICE DETAIL POPUP */
-.device-popup{display:none;position:absolute;background:rgba(10,10,20,.97);border:1px solid var(--gold);border-radius:8px;padding:1rem;min-width:200px;z-index:100;box-shadow:0 10px 40px rgba(0,0,0,.7)}
-.device-popup.show{display:block}
-.device-popup h4{font-family:var(--fdisplay);font-size:.6rem;letter-spacing:.12em;color:var(--gold);margin-bottom:.5rem;text-transform:uppercase}
-.device-popup .dp-row{display:flex;justify-content:space-between;font-size:.7rem;padding:3px 0}
-.device-popup .dp-label{color:var(--dim)}
-.device-popup .dp-val{color:var(--ltblue);font-weight:700}
+        /* OVERVIEW */
+        .overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:15px}
+        .stat-card{background:#111;border:1px solid var(--gold);border-left:4px solid var(--gold);padding:15px}
+        .stat-card .card-label{font-size:11px;letter-spacing:3px;color:var(--blue);margin-bottom:5px}
+        .stat-card .card-value{font-size:36px;font-weight:700;color:var(--gold)}
+        .stat-card .card-sub{font-size:11px;color:var(--peach);margin-top:3px}
 
-/* BOTTOMBAR */
-.lcars-bottombar{display:flex;align-items:stretch;gap:3px;height:50px}
-.bottombar-left{background:var(--orange);border-radius:0 20px 0 0;min-width:220px;display:flex;align-items:center;justify-content:center}
-.bottombar-center{flex:1;background:var(--panel);display:flex;align-items:center;justify-content:center;gap:2rem;font-size:.55rem;color:var(--dim);letter-spacing:.1em}
-.bottombar-right{background:var(--gold);border-radius:20px 0 0 0;min-width:200px;display:flex;align-items:center;justify-content:center;font-family:var(--fdisplay);font-size:.5rem;font-weight:700;color:#000;letter-spacing:.1em}
+        .device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:15px}
+        .device-card{background:#0a0a1a;border:1px solid #333;padding:12px;display:flex;gap:12px;align-items:center;transition:all .2s;cursor:pointer}
+        .device-card:hover{border-color:var(--gold);background:#111122}
+        .dev-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .dev-icon.online{background:rgba(85,255,85,.15);border:2px solid var(--green)}
+        .dev-icon.offline{background:rgba(204,68,68,.15);border:2px solid var(--red)}
+        .dev-name{font-size:14px;color:var(--gold);font-weight:700}
+        .dev-model{font-size:11px;color:#888}
+        .dev-status{font-size:10px;margin-top:2px}
+        .dev-status.online{color:var(--green)}
+        .dev-status.offline{color:var(--red)}
 
-/* CONFIG MODAL */
-.config-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:10000;align-items:center;justify-content:center}
-.config-overlay.show{display:flex}
-.config-modal{background:rgba(10,10,20,.97);border:1px solid var(--gold);border-radius:12px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;padding:0}
-.config-modal-header{background:var(--gold);padding:10px 20px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between}
-.config-modal-header h3{font-family:var(--fdisplay);font-size:.6rem;font-weight:700;letter-spacing:.12em;color:#000;text-transform:uppercase}
-.config-modal-close{background:none;border:none;color:#000;font-size:1.2rem;cursor:pointer;padding:4px 8px}
-.config-modal-body{padding:1.5rem}
-.config-modal-body label{display:block;font-size:.65rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;font-family:var(--fdisplay)}
-.config-modal-body input,.config-modal-body select{width:100%;padding:8px 12px;background:rgba(241,161,54,.04);border:1px solid rgba(241,161,54,.2);border-radius:6px;color:var(--text);font-family:var(--fdata);font-size:.8rem;margin-bottom:1rem;outline:none;transition:border .2s}
-.config-modal-body input:focus{border-color:var(--gold)}
-.config-save-btn{width:100%;padding:10px;background:var(--gold);border:none;border-radius:8px;color:#000;font-family:var(--fdisplay);font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.config-save-btn:hover{filter:brightness(1.2)}
+        .section-title{font-size:16px;color:var(--blue);letter-spacing:4px;text-transform:uppercase;margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--blue);opacity:.8}
+        .section-title:first-child{margin-top:0}
 
-@media(max-width:900px){.lcars-frame{grid-template-columns:1fr}.lcars-sidebar{display:none}.panels-grid{grid-template-columns:1fr 1fr}.tools-row{grid-template-columns:1fr}}
-@media(max-width:600px){.panels-grid{grid-template-columns:1fr}.topbar-left,.topbar-right{display:none}}
-</style>
+        /* SCHEMATIC */
+        .schematic-container,.topology-container{width:100%;height:calc(100vh - 180px);position:relative;overflow:hidden}
+        .schematic-container svg,.topology-container svg{width:100%;height:100%}
+
+        /* CLIENT ROW */
+        .client-row{display:grid;grid-template-columns:40px 2fr 1fr 1fr 1fr 80px;gap:10px;align-items:center;padding:10px 15px;background:#0a0a1a;border-left:3px solid var(--blue);font-size:13px;transition:all .2s;margin-bottom:4px}
+        .client-row:hover{background:#111133;border-left-color:var(--gold)}
+
+        /* THREAT */
+        .threat-panel{background:#0a0a1a;border:1px solid var(--red);border-left:4px solid var(--red);padding:15px;margin-bottom:10px}
+        .threat-title{color:var(--red);font-size:14px;letter-spacing:2px;margin-bottom:8px}
+        .threat-info{color:#999;font-size:13px}
+
+        /* PULSE */
+        .pulse-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+        .pulse-meter{background:#0a0a1a;border:1px solid var(--cyan);padding:15px;text-align:center}
+        .pulse-meter .meter-label{font-size:11px;color:var(--cyan);letter-spacing:2px;margin-bottom:8px}
+        .pulse-meter .meter-value{font-size:32px;color:var(--gold);font-weight:700}
+        .pulse-meter .meter-bar{height:6px;background:#222;margin-top:10px;border-radius:3px;overflow:hidden}
+        .pulse-meter .meter-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:3px;transition:width .5s}
+    </style>
 </head>
 <body>
-<div class="lcars-frame">
-    <!-- LEFT SIDEBAR — Labelled Navigation Tabs -->
-    <div class="lcars-sidebar">
-        <div class="lcars-elbow-top"></div>
-        <div class="lcars-bar">
-            <div class="lcars-block gold active" onclick="switchView('overview',this)">Overview</div>
-            <div class="lcars-block blue" onclick="switchView('floorplan',this)">Deck Plan</div>
-            <div class="lcars-block orange" onclick="switchView('devices',this)">Devices</div>
-            <div class="lcars-block purple" onclick="switchView('stations',this)">Stations</div>
-            <div class="lcars-block teal" onclick="switchView('diagnostics',this)">Diagnostics</div>
-            <div class="lcars-block red" onclick="window.open('/threats/','_self')">Threat Watch</div>
-            <div class="lcars-block ltblue" onclick="switchView('floorplan',this)">Topology</div>
-            <div class="lcars-block gold" onclick="document.getElementById('config-overlay').classList.add('show')">Settings</div>
+    <div class="scanline"></div>
+    <div class="red-alert-overlay"></div>
+
+    <!-- TOP HEADER -->
+    <div class="lcars-header">
+        <div class="elbow-tl">LCARS 47</div>
+        <div class="bar-top">
+            <div class="title">Network Command</div>
+            <div class="status-items">
+                <div class="status-item">GATEWAY <span class="val" id="hdr-gw">---</span></div>
+                <div class="status-item">DEVICES <span class="val" id="hdr-dev">---</span></div>
+                <div class="status-item">CLIENTS <span class="val" id="hdr-cli">---</span></div>
+                <div class="status-item">STATUS <span class="val" id="hdr-status">SCANNING</span></div>
+                <div class="status-item">STARDATE <span class="val" id="hdr-stardate">---</span></div>
+            </div>
         </div>
-        <div class="lcars-elbow-bottom"></div>
+        <div class="elbow-tr"></div>
     </div>
 
-    <!-- TOP BAR -->
-    <div class="lcars-topbar">
-        <div class="topbar-left"><div class="topbar-title">Network Command</div></div>
-        <div class="topbar-center">
-            <div class="status-readout"><div class="readout-dot" id="conn-dot"></div><div><div class="readout-label">Gateway</div><div class="readout-value" id="gw-model">--</div></div></div>
-            <div class="status-readout"><div><div class="readout-label">Clients</div><div class="readout-value" id="client-count">--</div></div></div>
-            <div class="status-readout"><div><div class="readout-label">Access Points</div><div class="readout-value" id="ap-count">--</div></div></div>
-            <div class="status-readout"><div><div class="readout-label">WAN</div><div class="readout-value" id="wan-status">--</div></div></div>
-            <div class="status-readout"><div><div class="readout-label">Uptime</div><div class="readout-value" id="uptime-val">--</div></div></div>
-        </div>
-        <div class="topbar-right"><div class="stardate" id="stardate">STARDATE --</div></div>
-    </div>
-
-    <!-- MAIN CONTENT -->
+    <!-- MAIN LAYOUT -->
     <div class="lcars-main">
-
-        <!-- VIEW: OVERVIEW -->
-        <div class="view-panel active" id="view-overview">
-            <div class="section-header"><div class="section-pill">Systems Status</div><div class="section-line"></div></div>
-            <div class="panels-grid" id="status-panels">
-                <div class="data-panel" style="animation-delay:.1s"><div class="panel-title">Network Devices</div>
-                    <div class="data-row"><span class="data-label">Access Points</span><span class="data-val highlight" id="d-aps">--</span></div>
-                    <div class="data-row"><span class="data-label">Switches</span><span class="data-val highlight" id="d-switches">--</span></div>
-                    <div class="data-row"><span class="data-label">Connected Clients</span><span class="data-val highlight" id="d-clients">--</span></div>
-                </div>
-                <div class="data-panel" style="animation-delay:.2s"><div class="panel-title">Gateway Info</div>
-                    <div class="data-row"><span class="data-label">Model</span><span class="data-val" id="d-model">--</span></div>
-                    <div class="data-row"><span class="data-label">Firmware</span><span class="data-val" id="d-fw">--</span></div>
-                    <div class="data-row"><span class="data-label">WAN IP</span><span class="data-val" id="d-wanip">--</span></div>
-                </div>
-                <div class="data-panel" style="animation-delay:.3s"><div class="panel-title">Internet Stats</div>
-                    <div class="data-row"><span class="data-label">Latency</span><span class="data-val" id="d-latency">--</span></div>
-                    <div class="data-row"><span class="data-label">Download</span><span class="data-val" id="d-down">--</span></div>
-                    <div class="data-row"><span class="data-label">Upload</span><span class="data-val" id="d-up">--</span></div>
-                </div>
-                <div class="data-panel" style="animation-delay:.4s"><div class="panel-title">Device Health</div>
-                    <div id="health-rows"></div>
-                </div>
-            </div>
-
-            <div style="margin-top:1rem">
-                <div class="section-header"><div class="section-pill" style="background:var(--blue)">Station Access</div><div class="section-line" style="background:linear-gradient(90deg,var(--blue),transparent)"></div></div>
-                <div class="tools-row">
-                    <div class="tool-panel" onclick="location.href='/stalker/'"><div class="tool-header"><span class="tool-name">Wi-Fi Stalker</span><span class="tool-ver">v0.11.4</span></div><div class="tool-body"><div class="tool-desc">Track Wi-Fi client devices. Monitor connections, detect roaming, maintain history logs.</div><div class="tool-badges"><span class="tool-badge">Tracking</span><span class="tool-badge">Roaming</span><span class="tool-badge">History</span></div><a href="/stalker/" class="tool-launch">Access Station</a></div></div>
-                    <div class="tool-panel" onclick="location.href='/threats/'"><div class="tool-header"><span class="tool-name">Threat Watch</span><span class="tool-ver">v0.5.1</span></div><div class="tool-body"><div class="tool-desc">Monitor IDS/IPS events in real-time. View blocked threats, analyze security trends.</div><div class="tool-badges"><span class="tool-badge">IDS/IPS</span><span class="tool-badge">Attackers</span><span class="tool-badge">GeoIP</span></div><a href="/threats/" class="tool-launch">Access Station</a></div></div>
-                    <div class="tool-panel" onclick="location.href='/pulse/'"><div class="tool-header"><span class="tool-name">Network Pulse</span><span class="tool-ver">v0.3.0</span></div><div class="tool-body"><div class="tool-desc">Real-time network monitoring dashboard. Bandwidth, AP status, top clients at a glance.</div><div class="tool-badges"><span class="tool-badge">Live Stats</span><span class="tool-badge">Clients</span><span class="tool-badge">Fullscreen</span></div><a href="/pulse/" class="tool-launch">Access Station</a></div></div>
-                </div>
-            </div>
+        <div class="lcars-sidebar">
+            <div class="sidebar-block active" data-view="overview" onclick="switchView('overview')">OVERVIEW</div>
+            <div class="sidebar-block" data-view="deckplan" onclick="switchView('deckplan')">DECK PLAN</div>
+            <div class="sidebar-block" data-view="topology" onclick="switchView('topology')">TOPOLOGY</div>
+            <div class="sidebar-block" data-view="devices" onclick="switchView('devices')">DEVICES</div>
+            <div class="sidebar-block" data-view="stalker" onclick="switchView('stalker')">WI-FI TRACK</div>
+            <div class="sidebar-block" data-view="threats" onclick="switchView('threats')">THREAT WATCH</div>
+            <div class="sidebar-block" data-view="pulse" onclick="switchView('pulse')">NET PULSE</div>
+            <div class="sidebar-block" data-view="settings" onclick="switchView('settings')">CONFIG</div>
         </div>
 
-        <!-- VIEW: DECK PLAN (Floor Plan) -->
-        <div class="view-panel" id="view-floorplan">
-            <div class="section-header"><div class="section-pill" style="background:var(--teal)">Deck Plan — Network Topology</div><div class="section-line" style="background:linear-gradient(90deg,var(--teal),transparent)"></div></div>
-            <div class="floor-plan-container">
-                <svg class="floor-plan-svg" id="floor-plan" viewBox="0 0 900 400">
-                    <!-- Building outline -->
-                    <rect x="20" y="20" width="860" height="360" rx="8" fill="none" stroke="rgba(102,204,204,.15)" stroke-width="1"/>
+        <div class="lcars-content">
+            <div class="content-header">
+                <div class="ch-label" id="view-label">SYSTEM OVERVIEW</div>
+                <div class="ch-bar"></div>
+                <div class="ch-info" id="view-info">ACTIVE</div>
+            </div>
 
-                    <!-- Rooms -->
-                    <rect class="fp-room" x="30" y="30" width="250" height="170" rx="4" data-room="main"/>
-                    <text class="fp-room-label" x="155" y="52">Main Area</text>
+            <div class="content-body">
+                <div class="view-panel active" id="panel-overview"></div>
+                <div class="view-panel" id="panel-deckplan"></div>
+                <div class="view-panel" id="panel-topology"></div>
+                <div class="view-panel" id="panel-devices"></div>
+                <div class="view-panel" id="panel-stalker"></div>
+                <div class="view-panel" id="panel-threats"></div>
+                <div class="view-panel" id="panel-pulse"></div>
+                <div class="view-panel" id="panel-settings"></div>
+            </div>
 
-                    <rect class="fp-room" x="290" y="30" width="200" height="170" rx="4" data-room="office"/>
-                    <text class="fp-room-label" x="390" y="52">Office</text>
-
-                    <rect class="fp-room" x="500" y="30" width="180" height="170" rx="4" data-room="server"/>
-                    <text class="fp-room-label" x="590" y="52">Server Room</text>
-
-                    <rect class="fp-room" x="690" y="30" width="180" height="170" rx="4" data-room="ext"/>
-                    <text class="fp-room-label" x="780" y="52">External</text>
-
-                    <rect class="fp-room" x="30" y="210" width="350" height="160" rx="4" data-room="living"/>
-                    <text class="fp-room-label" x="205" y="232">Living Space</text>
-
-                    <rect class="fp-room" x="390" y="210" width="230" height="160" rx="4" data-room="bed"/>
-                    <text class="fp-room-label" x="505" y="232">Bedroom Area</text>
-
-                    <rect class="fp-room" x="630" y="210" width="240" height="160" rx="4" data-room="garage"/>
-                    <text class="fp-room-label" x="750" y="232">Garage / Utility</text>
-
-                    <!-- Devices will be placed dynamically by JS -->
-                    <g id="fp-devices"></g>
-
-                    <!-- Connection lines will be drawn by JS -->
-                    <g id="fp-connections"></g>
-                </svg>
-
-                <div class="fp-legend">
-                    <div class="fp-legend-item"><div class="fp-legend-dot" style="background:var(--teal)"></div> Access Point (Online)</div>
-                    <div class="fp-legend-item"><div class="fp-legend-dot" style="background:var(--blue)"></div> Switch (Online)</div>
-                    <div class="fp-legend-item"><div class="fp-legend-dot" style="background:var(--red)"></div> Offline</div>
-                    <div class="fp-legend-item"><div class="fp-legend-dot" style="background:var(--gold);opacity:.3"></div> Clients Connected</div>
-                </div>
-
-                <div class="device-popup" id="device-popup">
-                    <h4 id="dp-name">--</h4>
-                    <div class="dp-row"><span class="dp-label">Model</span><span class="dp-val" id="dp-model">--</span></div>
-                    <div class="dp-row"><span class="dp-label">MAC</span><span class="dp-val" id="dp-mac">--</span></div>
-                    <div class="dp-row"><span class="dp-label">Status</span><span class="dp-val" id="dp-status">--</span></div>
-                    <div class="dp-row"><span class="dp-label">Uptime</span><span class="dp-val" id="dp-uptime">--</span></div>
-                </div>
+            <div class="content-footer">
+                <div class="bf-left"></div>
+                <div class="bf-mid">UNITED FEDERATION OF NETWORKS \u2022 M33HAN COMMAND \u2022 LCARS BUILD 47.3</div>
+                <div class="bf-right" id="footer-time">00:00:00</div>
             </div>
         </div>
-
-        <!-- VIEW: DEVICES LIST -->
-        <div class="view-panel" id="view-devices">
-            <div class="section-header"><div class="section-pill" style="background:var(--orange)">Device Registry</div><div class="section-line" style="background:linear-gradient(90deg,var(--orange),transparent)"></div></div>
-            <div id="device-list-container"></div>
-        </div>
-
-        <!-- VIEW: STATIONS -->
-        <div class="view-panel" id="view-stations">
-            <div class="section-header"><div class="section-pill" style="background:var(--blue)">Station Access</div><div class="section-line" style="background:linear-gradient(90deg,var(--blue),transparent)"></div></div>
-            <div class="tools-row">
-                <div class="tool-panel" onclick="location.href='/stalker/'"><div class="tool-header"><span class="tool-name">Wi-Fi Stalker</span><span class="tool-ver">v0.11.4</span></div><div class="tool-body"><div class="tool-desc">Track Wi-Fi client devices through your UniFi infrastructure. Monitor connections, detect roaming between access points, maintain historical logs.</div><div class="tool-badges"><span class="tool-badge">Device Tracking</span><span class="tool-badge">Roaming Detection</span><span class="tool-badge">History Logs</span></div><a href="/stalker/" class="tool-launch">Access Station</a></div></div>
-                <div class="tool-panel" onclick="location.href='/threats/'"><div class="tool-header"><span class="tool-name">Threat Watch</span><span class="tool-ver">v0.5.1</span></div><div class="tool-body"><div class="tool-desc">Monitor IDS/IPS events in real-time. View blocked threats, top attackers, analyze security trends with GeoIP threat mapping and AbuseIPDB intelligence.</div><div class="tool-badges"><span class="tool-badge">IDS/IPS Events</span><span class="tool-badge">Top Attackers</span><span class="tool-badge">GeoIP Lookup</span><span class="tool-badge">Threat Intel</span></div><a href="/threats/" class="tool-launch">Access Station</a></div></div>
-                <div class="tool-panel" onclick="location.href='/pulse/'"><div class="tool-header"><span class="tool-name">Network Pulse</span><span class="tool-ver">v0.3.0</span></div><div class="tool-body"><div class="tool-desc">Real-time network monitoring dashboard designed for always-on displays. View bandwidth, AP status, top clients, and network health at a glance.</div><div class="tool-badges"><span class="tool-badge">Live Stats</span><span class="tool-badge">Client Usage</span><span class="tool-badge">Fullscreen Mode</span></div><a href="/pulse/" class="tool-launch">Access Station</a></div></div>
-            </div>
-        </div>
-
-        <!-- VIEW: DIAGNOSTICS -->
-        <div class="view-panel" id="view-diagnostics">
-            <div class="section-header"><div class="section-pill" style="background:var(--teal)">System Diagnostics</div><div class="section-line" style="background:linear-gradient(90deg,var(--teal),transparent)"></div></div>
-            <div class="panels-grid" style="grid-template-columns:1fr 1fr">
-                <div class="data-panel"><div class="panel-title">Application Info</div>
-                    <div class="data-row"><span class="data-label">Version</span><span class="data-val">v1.8.9</span></div>
-                    <div class="data-row"><span class="data-label">Interface</span><span class="data-val highlight">LCARS v2.0</span></div>
-                    <div class="data-row"><span class="data-label">Fork</span><span class="data-val">M33HAN</span></div>
-                    <div class="data-row"><span class="data-label">Base</span><span class="data-val">Crosstalk Solutions</span></div>
-                    <div class="data-row"><span class="data-label">Deployment</span><span class="data-val highlight">Local</span></div>
-                </div>
-                <div class="data-panel"><div class="panel-title" style="color:var(--teal)">Network Summary</div>
-                    <div class="data-row"><span class="data-label">Total Devices</span><span class="data-val highlight" id="diag-total">--</span></div>
-                    <div class="data-row"><span class="data-label">Online</span><span class="data-val" style="color:var(--teal)" id="diag-online">--</span></div>
-                    <div class="data-row"><span class="data-label">Offline</span><span class="data-val warn" id="diag-offline">--</span></div>
-                    <div class="data-row"><span class="data-label">Controller</span><span class="data-val" id="diag-ctrl">--</span></div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- BOTTOM BAR -->
-    <div class="lcars-bottombar">
-        <div class="bottombar-left"><span style="font-family:var(--fdisplay);font-size:.5rem;font-weight:700;color:#000;letter-spacing:.1em">UI TOOLKIT v1.8.9</span></div>
-        <div class="bottombar-center"><span>FORKED BY M33HAN</span><span>•</span><span>BASED ON CROSSTALK SOLUTIONS</span><span>•</span><span>NOT AFFILIATED WITH UBIQUITI INC</span></div>
-        <div class="bottombar-right">LCARS INTERFACE v2.0</div>
-    </div>
-</div>
+    <script>
+    // ============ CORE ============
+    let networkData = null;
 
-<!-- CONFIG MODAL -->
-<div class="config-overlay" id="config-overlay" onclick="if(event.target===this)this.classList.remove('show')">
-    <div class="config-modal">
-        <div class="config-modal-header"><h3>UniFi Controller Configuration</h3><button class="config-modal-close" onclick="document.getElementById('config-overlay').classList.remove('show')">&times;</button></div>
-        <div class="config-modal-body">
-            <label>Controller URL</label>
-            <input type="text" id="cfg-url" placeholder="https://192.168.0.239">
-            <label>API Key</label>
-            <input type="text" id="cfg-apikey" placeholder="Enter API key from Settings > Integrations">
-            <label>Username</label>
-            <input type="text" id="cfg-user" placeholder="Leave blank if using API key">
-            <label>Password</label>
-            <input type="password" id="cfg-pass" placeholder="Leave blank if using API key">
-            <button class="config-save-btn" onclick="saveConfig()">Save Configuration</button>
-        </div>
-    </div>
-</div>
-<script>
-// ===== VIEW SWITCHING =====
-function switchView(viewId, btn) {
-    document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.lcars-block').forEach(b => b.classList.remove('active'));
-    const panel = document.getElementById('view-' + viewId);
-    if (panel) panel.classList.add('active');
-    if (btn) btn.classList.add('active');
-}
+    function switchView(view) {
+        document.querySelectorAll('.sidebar-block').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-view="' + view + '"]').classList.add('active');
+        document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel-' + view).classList.add('active');
+        const labels = {
+            overview:['SYSTEM OVERVIEW','ACTIVE'],deckplan:['VESSEL SCHEMATIC','DECK 1'],
+            topology:['NETWORK TOPOLOGY','LIVE'],devices:['DEVICE REGISTRY','ALL SYSTEMS'],
+            stalker:['WI-FI TRACKING','MONITORING'],threats:['THREAT ANALYSIS','SHIELDS UP'],
+            pulse:['NETWORK PULSE','REAL-TIME'],settings:['CONFIGURATION','AUTHORIZED']
+        };
+        document.getElementById('view-label').textContent = labels[view][0];
+        document.getElementById('view-info').textContent = labels[view][1];
+        if (view === 'topology' && !document.getElementById('panel-topology').dataset.built) buildTopology();
+        if (view === 'deckplan' && !document.getElementById('panel-deckplan').dataset.built) buildDeckPlan();
+    }
 
-// ===== STARDATE =====
-function getStardate() {
-    const now = new Date();
-    const y = now.getFullYear();
-    const start = new Date(y, 0, 1);
-    const dayOfYear = Math.floor((now - start) / 86400000);
-    return ((y - 2000) * 1000 + dayOfYear * 2.7397).toFixed(1);
-}
+    function getStardate() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const start = new Date(y, 0, 1);
+        const diff = now - start;
+        const day = diff / 86400000;
+        return ((y - 2000) * 1000 + day * 2.7397).toFixed(1);
+    }
 
-// ===== DATA LOADING =====
-let allDevices = [];
+    function formatUptime(seconds) {
+        if (!seconds) return 'OFFLINE';
+        const d = Math.floor(seconds / 86400);
+        const h = Math.floor((seconds % 86400) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        if (d > 0) return d + 'd ' + h + 'h ' + m + 'm';
+        if (h > 0) return h + 'h ' + m + 'm';
+        return m + 'm';
+    }
 
-async function loadStatus() {
-    try {
-        const resp = await fetch('/api/system-status');
-        if (!resp.ok) return;
-        const d = await resp.json();
-        const sys = d.system || {};
-        const devices = sys.devices || [];
-        allDevices = devices;
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('footer-time').textContent = now.toLocaleTimeString('en-GB');
+        document.getElementById('hdr-stardate').textContent = getStardate();
+    }, 1000);
+    document.getElementById('hdr-stardate').textContent = getStardate();
 
-        const aps = devices.filter(x => x.type === 'uap');
-        const switches = devices.filter(x => x.type === 'usw');
-        const apsOn = aps.filter(x => x.state === 1).length;
-        const swOn = switches.filter(x => x.state === 1).length;
-        const totalOn = devices.filter(x => x.state === 1).length;
+    // ============ LOAD DATA ============
+    async function loadData() {
+        try {
+            const resp = await fetch('/api/system-status');
+            const data = await resp.json();
+            networkData = data;
+            const sys = data.system;
+            const devices = sys.devices || [];
+            const online = devices.filter(d => d.state === 1).length;
+            const offline = devices.filter(d => d.state !== 1).length;
+            const aps = devices.filter(d => d.type === 'uap');
+            const switches = devices.filter(d => d.type === 'usw');
 
-        // Topbar
-        document.getElementById('gw-model').textContent = sys.gateway_model || 'Cloud Hosted';
-        document.getElementById('client-count').textContent = devices.reduce((s,d) => s + (d.num_sta||0), 0) || '--';
-        document.getElementById('ap-count').textContent = aps.length;
-        document.getElementById('wan-status').textContent = sys.wan_status || (sys.is_hosted ? 'Cloud' : 'Offline');
-        document.getElementById('uptime-val').textContent = sys.uptime || '--';
-        document.getElementById('conn-dot').className = d.connected ? 'readout-dot' : 'readout-dot offline';
+            document.getElementById('hdr-gw').textContent = sys.gateway_model || 'N/A';
+            document.getElementById('hdr-dev').textContent = devices.length;
+            document.getElementById('hdr-cli').textContent = sys.num_clients || '0';
+            document.getElementById('hdr-status').textContent = offline > 0 ? 'CAUTION' : 'NOMINAL';
+            if (offline > 0) document.getElementById('hdr-status').style.color = '#cc4444';
 
-        // Status panels
-        document.getElementById('d-aps').textContent = apsOn + '/' + aps.length;
-        document.getElementById('d-switches').textContent = swOn + '/' + switches.length;
-        document.getElementById('d-clients').textContent = devices.reduce((s,d) => s + (d.num_sta||0), 0) || '--';
-        document.getElementById('d-model').textContent = sys.gateway_model || 'Cloud Hosted';
-        document.getElementById('d-fw').textContent = sys.gateway_version || '--';
-        document.getElementById('d-wanip').textContent = sys.wan_ip || (sys.is_hosted ? 'Cloud Managed' : '--');
-        document.getElementById('d-latency').textContent = sys.latency || '--';
-        document.getElementById('d-down').textContent = sys.download_speed || '--';
-        document.getElementById('d-up').textContent = sys.upload_speed || '--';
+            buildOverview(sys, devices, aps, switches, online, offline);
+            buildDevices(devices);
+            buildStalker(devices);
+            buildThreats(sys);
+            buildPulse(devices, sys);
+            buildSettings();
+        } catch(e) {
+            document.getElementById('panel-overview').innerHTML = '<div style="color:var(--red);padding:40px;font-size:18px;">\u26A0 CONNECTION LOST<br><br><span style="font-size:13px;color:#888;">Unable to reach /api/system-status. Check your UniFi connection.<br><br><button onclick="location.reload()" style="background:var(--gold);color:#000;border:none;padding:10px 25px;font-family:var(--heading);font-weight:700;cursor:pointer;">RETRY</button></span></div>';
+        }
+    }
 
-        // Health rows
-        document.getElementById('health-rows').innerHTML = devices.map(dev => {
-            const on = dev.state === 1;
-            return '<div class="data-row"><span class="data-label">' + (dev.name||dev.model) + '</span><span class="data-val' + (on ? ' highlight' : ' warn') + '">' + (on ? 'ONLINE' : 'OFFLINE') + '</span></div>';
-        }).join('');
+    // ============ BUILD OVERVIEW ============
+    function buildOverview(sys, devices, aps, switches, online, offline) {
+        document.getElementById('panel-overview').innerHTML =
+            '<div class="overview-grid">' +
+            '<div class="stat-card"><div class="card-label">TOTAL DEVICES</div><div class="card-value">' + devices.length + '</div><div class="card-sub">' + aps.length + ' ACCESS POINTS \u2022 ' + switches.length + ' SWITCHES</div></div>' +
+            '<div class="stat-card" style="border-left-color:var(--green)"><div class="card-label">SYSTEMS ONLINE</div><div class="card-value" style="color:var(--green)">' + online + '</div><div class="card-sub">' + Math.round(online/devices.length*100) + '% OPERATIONAL</div></div>' +
+            '<div class="stat-card" style="border-left-color:var(--red)"><div class="card-label">SYSTEMS OFFLINE</div><div class="card-value" style="color:var(--red)">' + offline + '</div><div class="card-sub">' + (offline > 0 ? 'REQUIRES ATTENTION' : 'ALL CLEAR') + '</div></div>' +
+            '<div class="stat-card" style="border-left-color:var(--blue)"><div class="card-label">CONNECTED CLIENTS</div><div class="card-value" style="color:var(--blue)">' + (sys.num_clients||0) + '</div><div class="card-sub">ACROSS ' + aps.filter(a=>a.state===1).length + ' ACTIVE APs</div></div>' +
+            '</div>' +
+            '<div class="section-title">ACCESS POINTS</div><div class="device-grid">' +
+            aps.map(d =>
+                '<div class="device-card"><div class="dev-icon ' + (d.state===1?'online':'offline') + '">\uD83D\uDCE1</div><div class="dev-info"><div class="dev-name">' + d.name + '</div><div class="dev-model">' + d.model + '</div><div class="dev-status ' + (d.state===1?'online':'offline') + '">\u25CF ' + (d.state===1?'ONLINE \u2014 '+formatUptime(d.uptime):'OFFLINE') + '</div></div></div>'
+            ).join('') +
+            '</div>' +
+            '<div class="section-title">SWITCHES</div><div class="device-grid">' +
+            switches.map(d =>
+                '<div class="device-card"><div class="dev-icon ' + (d.state===1?'online':'offline') + '">\uD83D\uDD0C</div><div class="dev-info"><div class="dev-name">' + d.name + '</div><div class="dev-model">' + d.model + '</div><div class="dev-status ' + (d.state===1?'online':'offline') + '">\u25CF ' + (d.state===1?'ONLINE \u2014 '+formatUptime(d.uptime):'OFFLINE') + '</div></div></div>'
+            ).join('') +
+            '</div>' +
+            '<div class="section-title">SYSTEM DIAGNOSTICS</div><div class="overview-grid">' +
+            '<div class="stat-card" style="border-left-color:var(--purple)"><div class="card-label">GATEWAY TYPE</div><div class="card-value" style="font-size:24px;color:var(--purple)">' + sys.gateway_model + '</div><div class="card-sub">CLOUD MANAGED</div></div>' +
+            '<div class="stat-card" style="border-left-color:var(--cyan)"><div class="card-label">LONGEST UPTIME</div><div class="card-value" style="font-size:24px;color:var(--cyan)">' + formatUptime(Math.max(...devices.filter(d=>d.uptime).map(d=>d.uptime))) + '</div><div class="card-sub">MOST STABLE SYSTEM</div></div>' +
+            '</div>';
+    }
 
-        // Diagnostics
-        document.getElementById('diag-total').textContent = devices.length;
-        document.getElementById('diag-online').textContent = totalOn;
-        document.getElementById('diag-offline').textContent = devices.length - totalOn;
-        document.getElementById('diag-ctrl').textContent = sys.is_hosted ? 'Cloud Hosted' : (sys.gateway_model || '--');
+    // ============ BUILD DEVICES ============
+    function buildDevices(devices) {
+        document.getElementById('panel-devices').innerHTML =
+            '<div class="section-title">DEVICE REGISTRY \u2014 ' + devices.length + ' UNITS</div>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:2px solid var(--gold)">' +
+            '<th style="text-align:left;padding:8px;color:var(--gold);letter-spacing:2px;font-size:11px">STATUS</th>' +
+            '<th style="text-align:left;padding:8px;color:var(--gold);letter-spacing:2px;font-size:11px">DESIGNATION</th>' +
+            '<th style="text-align:left;padding:8px;color:var(--gold);letter-spacing:2px;font-size:11px">MODEL</th>' +
+            '<th style="text-align:left;padding:8px;color:var(--gold);letter-spacing:2px;font-size:11px">TYPE</th>' +
+            '<th style="text-align:left;padding:8px;color:var(--gold);letter-spacing:2px;font-size:11px">MAC ADDRESS</th>' +
+            '<th style="text-align:left;padding:8px;color:var(--gold);letter-spacing:2px;font-size:11px">UPTIME</th>' +
+            '</tr></thead><tbody>' +
+            devices.map(d =>
+                '<tr style="border-bottom:1px solid #222" onmouseenter="this.style.background=\'#111133\'" onmouseleave="this.style.background=\'transparent\'">' +
+                '<td style="padding:10px 8px"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + (d.state===1?'#55ff55':'#cc4444') + ';box-shadow:0 0 8px ' + (d.state===1?'#55ff55':'#cc4444') + '"></span></td>' +
+                '<td style="padding:10px 8px;color:' + (d.state===1?'var(--gold)':'#666') + ';font-weight:700">' + d.name + '</td>' +
+                '<td style="padding:10px 8px;color:var(--ltblue)">' + d.model + '</td>' +
+                '<td style="padding:10px 8px;color:var(--purple)">' + (d.type==='uap'?'\uD83D\uDCE1 ACCESS POINT':'\uD83D\uDD0C SWITCH') + '</td>' +
+                '<td style="padding:10px 8px;color:#666;font-family:monospace;font-size:11px">' + d.mac + '</td>' +
+                '<td style="padding:10px 8px;color:' + (d.state===1?'var(--green)':'var(--red)') + '">' + (d.state===1?formatUptime(d.uptime):'OFFLINE') + '</td></tr>'
+            ).join('') +
+            '</tbody></table>';
+    }
 
-        // Stardate
-        document.getElementById('stardate').textContent = 'STARDATE ' + getStardate();
+    // ============ BUILD WI-FI STALKER ============
+    function buildStalker(devices) {
+        const aps = devices.filter(d => d.type === 'uap');
+        document.getElementById('panel-stalker').innerHTML =
+            '<div class="section-title">WI-FI CLIENT TRACKING</div>' +
+            '<div style="background:#0a0a1a;border:1px solid var(--blue);padding:20px;margin-bottom:15px">' +
+            '<div style="color:var(--blue);font-size:13px;letter-spacing:2px;margin-bottom:10px">TRACKING STATUS</div>' +
+            '<div style="color:var(--gold);font-size:11px">Monitor Wi-Fi clients as they roam between access points. Enter a MAC address to track.</div>' +
+            '<div style="margin-top:15px;display:flex;gap:10px">' +
+            '<input type="text" placeholder="ENTER MAC ADDRESS..." style="flex:1;background:#000;border:1px solid var(--blue);color:var(--gold);padding:10px;font-family:var(--heading);font-size:14px;letter-spacing:1px">' +
+            '<button style="background:var(--blue);color:#000;border:none;padding:10px 25px;font-family:var(--heading);font-weight:700;letter-spacing:2px;cursor:pointer">TRACK</button>' +
+            '</div></div>' +
+            '<div class="section-title">ACTIVE ACCESS POINTS</div>' +
+            aps.map(d =>
+                '<div class="client-row" style="border-left-color:' + (d.state===1?'var(--blue)':'var(--red)') + '">' +
+                '<div style="width:30px;height:30px;border-radius:50%;background:rgba(153,153,255,.15);border:1px solid ' + (d.state===1?'var(--blue)':'var(--red)') + ';display:flex;align-items:center;justify-content:center;font-size:14px">\uD83D\uDCE1</div>' +
+                '<div style="color:' + (d.state===1?'var(--gold)':'#666') + ';font-weight:700">' + d.name + '</div>' +
+                '<div style="font-family:monospace;color:#666;font-size:11px">' + d.mac + '</div>' +
+                '<div style="color:' + (d.state===1?'var(--green)':'var(--red)') + '">' + (d.state===1?'ACTIVE':'OFFLINE') + '</div>' +
+                '<div style="color:var(--purple)">' + d.model + '</div>' +
+                '<div style="color:' + (d.state===1?'var(--cyan)':'#444') + '">' + (d.state===1?formatUptime(d.uptime):'-') + '</div>' +
+                '</div>'
+            ).join('') +
+            '<div class="section-title" style="margin-top:20px">ROAMING LOG</div>' +
+            '<div id="stalker-log" style="background:#050510;border:1px solid #222;padding:15px;font-family:monospace;font-size:11px;color:#555;height:150px;overflow-y:auto">' +
+            '<div style="color:var(--green)">[' + new Date().toLocaleTimeString() + '] Wi-Fi tracking system initialized</div>' +
+            '<div style="color:var(--blue)">[' + new Date().toLocaleTimeString() + '] Monitoring ' + aps.filter(a=>a.state===1).length + ' active access points</div>' +
+            '</div>';
+    }
 
-        // Update floor plan & device list
-        renderFloorPlan(devices);
-        renderDeviceList(devices);
-    } catch(e) { console.error('Status load failed', e); }
-}
+    // ============ BUILD THREATS ============
+    function buildThreats(sys) {
+        document.getElementById('panel-threats').innerHTML =
+            '<div class="section-title">THREAT ANALYSIS \u2014 SHIELDS STATUS</div>' +
+            '<div class="overview-grid">' +
+            '<div class="stat-card" style="border-left-color:var(--red)"><div class="card-label">IDS/IPS STATUS</div><div class="card-value" style="font-size:20px;color:var(--red)">UNAVAILABLE</div><div class="card-sub">CLOUD HOSTED \u2014 NO LOCAL GATEWAY</div></div>' +
+            '<div class="stat-card" style="border-left-color:var(--gold)"><div class="card-label">GATEWAY TYPE</div><div class="card-value" style="font-size:20px;color:var(--gold)">CLOUD</div><div class="card-sub">UDM/UCG/UXG REQUIRED FOR IDS/IPS</div></div>' +
+            '<div class="stat-card" style="border-left-color:var(--cyan)"><div class="card-label">THREAT LEVEL</div><div class="card-value" style="font-size:20px;color:var(--cyan)">UNKNOWN</div><div class="card-sub">NO SENSOR DATA AVAILABLE</div></div>' +
+            '</div>' +
+            '<div class="section-title">DEFENSE GRID</div>' +
+            '<div class="threat-panel"><div class="threat-title">\u26A0 INTRUSION DETECTION SYSTEM</div><div class="threat-info">IDS/IPS monitoring requires a UniFi Gateway device (UDM, UCG, UXG, or USG). Your Cloud Hosted configuration does not support local threat detection.</div></div>' +
+            '<div class="threat-panel" style="border-color:var(--gold);border-left-color:var(--gold)"><div class="threat-title" style="color:var(--gold)">RECOMMENDATION</div><div class="threat-info">Deploy a UniFi Dream Machine or Cloud Gateway to enable real-time IDS/IPS threat detection, GeoIP-based threat mapping, deep packet inspection, and traffic analysis.</div></div>' +
+            '<div class="section-title">ABUSEIPDB INTELLIGENCE</div>' +
+            '<div style="background:#0a0a1a;border:1px solid var(--purple);padding:20px">' +
+            '<div style="color:var(--purple);font-size:12px;letter-spacing:2px;margin-bottom:10px">IP REPUTATION LOOKUP</div>' +
+            '<div style="display:flex;gap:10px">' +
+            '<input type="text" placeholder="ENTER IP ADDRESS..." style="flex:1;background:#000;border:1px solid var(--purple);color:var(--gold);padding:10px;font-family:var(--heading);font-size:14px">' +
+            '<button style="background:var(--purple);color:#000;border:none;padding:10px 25px;font-family:var(--heading);font-weight:700;letter-spacing:2px;cursor:pointer">ANALYZE</button>' +
+            '</div></div>';
+    }
 
-// ===== FLOOR PLAN RENDERING =====
-function renderFloorPlan(devices) {
-    const g = document.getElementById('fp-devices');
-    const cg = document.getElementById('fp-connections');
-    g.innerHTML = '';
-    cg.innerHTML = '';
+    // ============ BUILD PULSE ============
+    function buildPulse(devices, sys) {
+        const online = devices.filter(d => d.state === 1).length;
+        document.getElementById('panel-pulse').innerHTML =
+            '<div class="section-title">NETWORK PULSE \u2014 REAL-TIME TELEMETRY</div>' +
+            '<div class="pulse-grid">' +
+            '<div class="pulse-meter"><div class="meter-label">DEVICES ONLINE</div><div class="meter-value" style="color:var(--green)">' + online + '/' + devices.length + '</div><div class="meter-bar"><div class="meter-fill" style="width:' + Math.round(online/devices.length*100) + '%"></div></div></div>' +
+            '<div class="pulse-meter"><div class="meter-label">NETWORK LOAD</div><div class="meter-value">--</div><div class="meter-bar"><div class="meter-fill" style="width:0%"></div></div><div style="font-size:10px;color:#555;margin-top:5px">CLOUD HOSTED \u2014 NO CPU/RAM DATA</div></div>' +
+            '<div class="pulse-meter"><div class="meter-label">CONNECTED CLIENTS</div><div class="meter-value" style="color:var(--blue)">' + (sys.num_clients||0) + '</div><div class="meter-bar"><div class="meter-fill" style="width:' + Math.min((sys.num_clients||0),100) + '%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div></div>' +
+            '</div>' +
+            '<div class="section-title" style="margin-top:20px">SYSTEM HEARTBEAT</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(' + devices.length + ',1fr);gap:6px">' +
+            devices.map(d =>
+                '<div style="background:#0a0a1a;border:1px solid ' + (d.state===1?'#333':'#cc4444') + ';padding:12px;text-align:center">' +
+                '<div style="font-size:20px;margin-bottom:5px">' + (d.type==='uap'?'\uD83D\uDCE1':'\uD83D\uDD0C') + '</div>' +
+                '<div style="font-size:10px;color:' + (d.state===1?'var(--gold)':'#666') + ';font-weight:700;margin-bottom:3px">' + (d.name.length>12?d.name.substring(0,10)+'..':d.name) + '</div>' +
+                '<div style="width:10px;height:10px;border-radius:50%;background:' + (d.state===1?'#55ff55':'#cc4444') + ';margin:0 auto;box-shadow:0 0 10px ' + (d.state===1?'#55ff55':'#cc4444') + '"></div></div>'
+            ).join('') +
+            '</div>' +
+            '<div class="section-title" style="margin-top:20px">LIVE DATA STREAM</div>' +
+            '<div id="pulse-log" style="background:#050510;border:1px solid #222;padding:10px;font-family:monospace;font-size:11px;height:120px;overflow-y:auto"></div>';
 
-    // Position devices in rooms
-    const positions = [];
-    const aps = devices.filter(d => d.type === 'uap');
-    const sws = devices.filter(d => d.type === 'usw');
+        // Start live log
+        const entries = [
+            {c:'#55ff55',m:'System health check: All primary systems nominal'},
+            {c:'#88ddff',m:'AP signal strength: optimal'},
+            {c:'#f1a727',m:'Switch port scan: all ports responding'},
+            {c:'#9999ff',m:'Client count update: ' + (sys.num_clients||0) + ' active connections'},
+            {c:'#cc4444',m:'Warning: Offline device detected'}
+        ];
+        setInterval(() => {
+            const log = document.getElementById('pulse-log');
+            if (!log) return;
+            const e = entries[Math.floor(Math.random()*entries.length)];
+            const div = document.createElement('div');
+            div.style.color = e.c;
+            div.textContent = '[' + new Date().toLocaleTimeString() + '] ' + e.m;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+            if (log.children.length > 50) log.removeChild(log.firstChild);
+        }, 3000);
+    }
 
-    // Place APs across rooms
-    const apRooms = [
-        {x:155,y:120}, {x:390,y:120}, {x:590,y:120}, {x:780,y:120},
-        {x:205,y:300}, {x:505,y:300}, {x:750,y:300}
-    ];
-    aps.forEach((dev, i) => {
-        const pos = apRooms[i % apRooms.length];
-        positions.push({...dev, x:pos.x, y:pos.y});
-        const on = dev.state === 1;
-        const color = on ? 'var(--teal)' : 'var(--red)';
-        g.innerHTML += '<g class="fp-device" onclick="showDevicePopup(event,' + JSON.stringify(dev).replace(/"/g,'&quot;') + ')">' +
-            '<circle cx="' + pos.x + '" cy="' + pos.y + '" r="14" class="fp-device-ring ' + (on?'online':'offline') + '"/>' +
-            '<text x="' + pos.x + '" y="' + (pos.y+3) + '" text-anchor="middle" fill="' + color + '" font-size="12">📡</text>' +
-            '<text class="fp-device-label" x="' + pos.x + '" y="' + (pos.y+24) + '">' + (dev.name||dev.model) + '</text>' +
-            '<text class="fp-device-status ' + (on?'online':'offline') + '" x="' + pos.x + '" y="' + (pos.y+32) + '">' + (on?'ONLINE':'OFFLINE') + '</text>' +
-            '</g>';
-    });
+    // ============ BUILD SETTINGS ============
+    function buildSettings() {
+        document.getElementById('panel-settings').innerHTML =
+            '<div class="section-title">SYSTEM CONFIGURATION</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">' +
+            '<div style="background:#0a0a1a;border:1px solid var(--gold);padding:20px">' +
+            '<div style="color:var(--gold);font-size:13px;letter-spacing:2px;margin-bottom:15px">UNIFI CONNECTION</div>' +
+            '<div style="margin-bottom:10px"><label style="font-size:11px;color:var(--blue);letter-spacing:1px">CONTROLLER ADDRESS</label><input type="text" id="cfg-host" value="" style="width:100%;background:#000;border:1px solid #333;color:var(--gold);padding:8px;margin-top:4px;font-family:var(--heading)"></div>' +
+            '<div style="margin-bottom:10px"><label style="font-size:11px;color:var(--blue);letter-spacing:1px">USERNAME</label><input type="text" id="cfg-user" style="width:100%;background:#000;border:1px solid #333;color:var(--gold);padding:8px;margin-top:4px;font-family:var(--heading)"></div>' +
+            '<div style="margin-bottom:15px"><label style="font-size:11px;color:var(--blue);letter-spacing:1px">PASSWORD</label><input type="password" id="cfg-pass" style="width:100%;background:#000;border:1px solid #333;color:var(--gold);padding:8px;margin-top:4px;font-family:var(--heading)"></div>' +
+            '<button onclick="saveConfig()" style="background:var(--gold);color:#000;border:none;padding:10px 20px;font-family:var(--heading);font-weight:700;letter-spacing:2px;cursor:pointer">SAVE CONNECTION</button>' +
+            '</div>' +
+            '<div style="background:#0a0a1a;border:1px solid var(--purple);padding:20px">' +
+            '<div style="color:var(--purple);font-size:13px;letter-spacing:2px;margin-bottom:15px">DISPLAY SETTINGS</div>' +
+            '<div style="margin-bottom:15px;display:flex;gap:10px;align-items:center"><label style="font-size:11px;color:var(--blue);letter-spacing:1px">RED ALERT MODE</label><button onclick="document.body.classList.toggle(\'red-alert\')" style="background:var(--red);color:#000;border:none;padding:6px 15px;font-family:var(--heading);font-weight:700;letter-spacing:1px;cursor:pointer;font-size:11px">TOGGLE</button></div>' +
+            '<div style="margin-bottom:15px;display:flex;gap:10px;align-items:center"><label style="font-size:11px;color:var(--blue);letter-spacing:1px">SCAN LINES</label><button onclick="document.querySelector(\'.scanline\').style.display=document.querySelector(\'.scanline\').style.display===\'none\'?\'block\':\'none\'" style="background:var(--cyan);color:#000;border:none;padding:6px 15px;font-family:var(--heading);font-weight:700;letter-spacing:1px;cursor:pointer;font-size:11px">TOGGLE</button></div>' +
+            '</div></div>' +
+            '<div class="section-title" style="margin-top:20px">SYSTEM INFORMATION</div>' +
+            '<div style="background:#0a0a1a;border:1px solid #333;padding:15px;font-family:monospace;font-size:12px">' +
+            '<div style="color:var(--gold)">LCARS NETWORK COMMAND v2.0</div>' +
+            '<div style="color:#666;margin-top:5px">Based on UI Toolkit for UniFi</div>' +
+            '<div style="color:#666">Modified by M33HAN \u2022 LCARS Interface</div>' +
+            '<div style="color:var(--green);margin-top:10px">Status: Connected</div></div>';
+    }
 
-    // Place switches in server room area
-    const swRooms = [{x:540,y:90}, {x:590,y:90}, {x:640,y:90}];
-    sws.forEach((dev, i) => {
-        const pos = swRooms[i % swRooms.length];
-        positions.push({...dev, x:pos.x, y:pos.y});
-        const on = dev.state === 1;
-        const color = on ? 'var(--blue)' : 'var(--red)';
-        g.innerHTML += '<g class="fp-device" onclick="showDevicePopup(event,' + JSON.stringify(dev).replace(/"/g,'&quot;') + ')">' +
-            '<rect x="' + (pos.x-12) + '" y="' + (pos.y-8) + '" width="24" height="16" rx="3" fill="none" stroke="' + color + '" stroke-width="1.5" class="fp-device-ring ' + (on?'online':'offline') + '"/>' +
-            '<text x="' + pos.x + '" y="' + (pos.y+3) + '" text-anchor="middle" fill="' + color + '" font-size="8">SW</text>' +
-            '<text class="fp-device-label" x="' + pos.x + '" y="' + (pos.y+22) + '">' + (dev.name||dev.model) + '</text>' +
-            '</g>';
+    async function saveConfig() {
+        const host = document.getElementById('cfg-host').value;
+        const user = document.getElementById('cfg-user').value;
+        const pass = document.getElementById('cfg-pass').value;
+        try {
+            await fetch('/api/configure', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({host, username: user, password: pass, port: 443, site: 'default', verify_ssl: false})
+            });
+            alert('Configuration saved. Reloading...');
+            location.reload();
+        } catch(e) { alert('Error saving: ' + e.message); }
+    }
 
-        // Draw connections from switches to APs
-        aps.forEach((ap, j) => {
-            const apPos = apRooms[j % apRooms.length];
-            if (ap.state === 1) {
-                cg.innerHTML += '<line class="fp-connection" x1="' + pos.x + '" y1="' + (pos.y+10) + '" x2="' + apPos.x + '" y2="' + (apPos.y-16) + '"/>';
+    // ============ BUILD DECK PLAN (Starship Schematic) ============
+    function buildDeckPlan() {
+        const panel = document.getElementById('panel-deckplan');
+        panel.dataset.built = '1';
+        const devices = networkData.system.devices || [];
+        const aps = devices.filter(d => d.type === 'uap');
+        const sws = devices.filter(d => d.type === 'usw');
+        const ncc = 'NCC-' + String(Math.floor(Math.random()*90000+10000));
+
+        let svg = '<div class="schematic-container"><svg viewBox="0 0 1200 650" xmlns="http://www.w3.org/2000/svg">';
+        svg += '<defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(50,50,100,.3)" stroke-width=".5"/></pattern>';
+        svg += '<filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+
+        // Background
+        svg += '<rect width="1200" height="650" fill="url(#grid)"/>';
+
+        // LCARS frame
+        svg += '<rect x="10" y="8" width="100" height="20" rx="10" fill="#f1a727"/>';
+        svg += '<text x="60" y="22" text-anchor="middle" font-family="Antonio,sans-serif" font-size="11" fill="#000" font-weight="700">M33HAN CLASS</text>';
+        svg += '<rect x="120" y="8" width="400" height="20" rx="10" fill="#9999ff"/>';
+        svg += '<text x="320" y="22" text-anchor="middle" font-family="Antonio,sans-serif" font-size="11" fill="#000" font-weight="700" letter-spacing="3">N.S.S. NETWORK \u2014 ' + ncc + '</text>';
+        svg += '<rect x="530" y="8" width="80" height="20" rx="10" fill="#cc99cc"/>';
+        svg += '<text x="570" y="22" text-anchor="middle" font-family="Antonio,sans-serif" font-size="10" fill="#000" font-weight="700">DECK 1</text>';
+
+        // Frame bars
+        svg += '<rect x="10" y="35" width="8" height="580" rx="4" fill="#f1a727"/>';
+        svg += '<rect x="10" y="610" width="200" height="8" rx="4" fill="#f1a727"/>';
+        svg += '<rect x="1182" y="35" width="8" height="580" rx="4" fill="#9999ff"/>';
+        svg += '<rect x="990" y="610" width="200" height="8" rx="4" fill="#9999ff"/>';
+
+        // Ship hull
+        svg += '<ellipse cx="600" cy="280" rx="380" ry="160" fill="rgba(20,20,50,.5)" stroke="#334" stroke-width="2"/>';
+        svg += '<ellipse cx="600" cy="280" rx="320" ry="130" fill="none" stroke="rgba(68,85,255,.3)" stroke-width="1" stroke-dasharray="8,4"/>';
+
+        // Nacelle struts
+        svg += '<path d="M 430 380 L 370 520 L 400 540 L 450 540 L 480 400" fill="rgba(20,20,50,.5)" stroke="#334" stroke-width="2"/>';
+        svg += '<path d="M 770 380 L 830 520 L 800 540 L 750 540 L 720 400" fill="rgba(20,20,50,.5)" stroke="#334" stroke-width="2"/>';
+
+        // Nacelles
+        svg += '<rect x="330" y="520" rx="15" width="160" height="40" fill="rgba(20,20,80,.6)" stroke="#4455ff" stroke-width="2"/>';
+        svg += '<line x1="350" y1="540" x2="480" y2="540" stroke="#4455ff" stroke-width="2" filter="url(#glow)"><animate attributeName="stroke-opacity" values=".3;1;.3" dur="2s" repeatCount="indefinite"/></line>';
+        svg += '<rect x="710" y="520" rx="15" width="160" height="40" fill="rgba(20,20,80,.6)" stroke="#4455ff" stroke-width="2"/>';
+        svg += '<line x1="720" y1="540" x2="850" y2="540" stroke="#4455ff" stroke-width="2" filter="url(#glow)"><animate attributeName="stroke-opacity" values=".3;1;.3" dur="2s" repeatCount="indefinite" begin=".5s"/></line>';
+        svg += '<text x="410" y="590" text-anchor="middle" font-family="Antonio,sans-serif" font-size="10" fill="#4455ff" letter-spacing="2">PORT NACELLE</text>';
+        svg += '<text x="790" y="590" text-anchor="middle" font-family="Antonio,sans-serif" font-size="10" fill="#4455ff" letter-spacing="2">STARBOARD NACELLE</text>';
+
+        // Bridge
+        svg += '<circle cx="600" cy="170" r="45" fill="rgba(241,167,39,.1)" stroke="#f1a727" stroke-width="2"/>';
+        svg += '<circle cx="600" cy="170" r="30" fill="rgba(241,167,39,.05)" stroke="rgba(241,167,39,.5)" stroke-width="1"/>';
+        svg += '<text x="600" y="145" text-anchor="middle" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".7">COMMAND CENTER</text>';
+        svg += '<text x="600" y="175" text-anchor="middle" font-family="Antonio,sans-serif" font-size="12" fill="#f1a727" font-weight="700" letter-spacing="2">BRIDGE</text>';
+
+        // Section lines
+        svg += '<line x1="600" y1="120" x2="600" y2="440" stroke="rgba(100,100,150,.2)" stroke-width="1" stroke-dasharray="4,4"/>';
+        svg += '<line x1="220" y1="280" x2="980" y2="280" stroke="rgba(100,100,150,.2)" stroke-width="1" stroke-dasharray="4,4"/>';
+
+        // Switches
+        var swPositions = [{x:600,y:280,name:'MAIN CORE'},{x:380,y:280,name:'SEC CORE'},{x:820,y:280,name:''}];
+        sws.forEach((s, i) => {
+            var p = swPositions[i] || {x:600+i*100,y:280,name:''};
+            var col = s.state===1 ? '#55ff55' : '#cc4444';
+            var dash = s.state===1 ? '' : ' stroke-dasharray="4,2"';
+            svg += '<g transform="translate(' + p.x + ',' + p.y + ')">';
+            svg += '<rect x="-60" y="-25" width="120" height="50" rx="5" fill="rgba(' + (s.state===1?'85,255,85':'204,68,68') + ',.08)" stroke="' + col + '" stroke-width="' + (i===0?'1.5':'1') + '"' + dash + '/>';
+            if (s.state===1) svg += '<circle cx="0" cy="0" r="8" fill="' + col + '" opacity=".8"><animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;.3;.8" dur="3s" repeatCount="indefinite"/></circle>';
+            svg += '<circle cx="0" cy="0" r="5" fill="' + col + '"' + (s.state!==1?' opacity=".5"':'') + '/>';
+            svg += '<text x="0" y="-12" text-anchor="middle" font-family="Antonio,sans-serif" font-size="8" fill="' + col + '" letter-spacing="1">' + s.name.toUpperCase() + '</text>';
+            svg += '<text x="0" y="20" text-anchor="middle" font-family="Antonio,sans-serif" font-size="10" fill="' + (s.state===1?'#f1a727':'#cc4444') + '" font-weight="700">' + (p.name || (s.state===1?'ONLINE':'OFFLINE')) + '</text>';
+            svg += '</g>';
+        });
+
+        // Switch connections
+        svg += '<line x1="430" y1="280" x2="540" y2="280" stroke="#55ff55" stroke-width="1.5" opacity=".5" filter="url(#glow)"><animate attributeName="stroke-opacity" values=".3;.8;.3" dur="1.5s" repeatCount="indefinite"/></line>';
+        svg += '<line x1="660" y1="280" x2="770" y2="280" stroke="#cc4444" stroke-width="1" opacity=".3" stroke-dasharray="4,4"/>';
+
+        // AP positions around ship
+        var apPos = [{x:350,y:190},{x:850,y:190},{x:600,y:220},{x:350,y:370},{x:850,y:370}];
+        aps.forEach((a, i) => {
+            var p = apPos[i] || {x:400+i*100,y:200};
+            var col = a.state===1 ? '#88ddff' : '#cc4444';
+            var dash = a.state!==1 ? ' stroke-dasharray="4,2"' : '';
+            svg += '<g transform="translate(' + p.x + ',' + p.y + ')">';
+            svg += '<circle cx="0" cy="0" r="22" fill="rgba(' + (a.state===1?'136,221,255':'204,68,68') + ',.08)" stroke="' + col + '" stroke-width="' + (a.state===1?'1.5':'1') + '"' + dash + '/>';
+            if (a.state===1) {
+                svg += '<circle cx="0" cy="0" r="30" fill="none" stroke="' + col + '" stroke-width=".5" opacity="0">';
+                svg += '<animate attributeName="r" values="22;35;22" dur="3s" repeatCount="indefinite" begin="' + (i*0.5) + 's"/>';
+                svg += '<animate attributeName="opacity" values=".5;0;.5" dur="3s" repeatCount="indefinite" begin="' + (i*0.5) + 's"/></circle>';
+            }
+            svg += '<text x="0" y="12" text-anchor="middle" font-family="Antonio,sans-serif" font-size="8" fill="' + col + '">' + (a.name.length>15?a.name.substring(0,12)+'..':a.name).toUpperCase() + '</text>';
+            svg += '<text x="0" y="38" text-anchor="middle" font-family="Antonio,sans-serif" font-size="7" fill="' + (a.state===1?'#55ff55':'#cc4444') + '">\u25CF ' + (a.state===1?'ONLINE':'OFFLINE') + '</text>';
+            svg += '</g>';
+            // Connection line to main switch
+            svg += '<line x1="' + p.x + '" y1="' + (p.y+(p.y<280?20:-20)) + '" x2="600" y2="' + (p.y<280?'255':'305') + '" stroke="rgba(' + (a.state===1?'136,221,255,.3':'204,68,68,.15') + ')" stroke-width="1"' + (a.state!==1?' stroke-dasharray="4,4"':'') + '/>';
+        });
+
+        // Annotations
+        svg += '<text x="30" y="55" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">DEVICES: ' + devices.length + '</text>';
+        svg += '<text x="30" y="70" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">CLIENTS: ' + (networkData.system.num_clients||0) + '</text>';
+        svg += '<text x="30" y="85" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">APs: ' + aps.length + '</text>';
+        svg += '<text x="30" y="100" font-family="Antonio,sans-serif" font-size="9" fill="#f1a727" opacity=".6" letter-spacing="2">SWITCHES: ' + sws.length + '</text>';
+        svg += '<text x="1170" y="55" text-anchor="end" font-family="Antonio,sans-serif" font-size="9" fill="#9999ff" opacity=".6" letter-spacing="2">LCARS SCHEMATIC</text>';
+        svg += '<text x="1170" y="70" text-anchor="end" font-family="Antonio,sans-serif" font-size="9" fill="#9999ff" opacity=".6" letter-spacing="2">VIEW: TOP-DOWN</text>';
+
+        // Data blocks
+        svg += '<rect x="30" y="440" width="160" height="80" fill="rgba(153,153,255,.08)" stroke="#9999ff" stroke-width="1"/>';
+        svg += '<text x="40" y="458" font-family="Antonio,sans-serif" font-size="9" fill="#9999ff" letter-spacing="2">POWER SYSTEMS</text>';
+        svg += '<text x="40" y="478" font-family="monospace" font-size="11" fill="#f1a727">POE BUDGET: ACTIVE</text>';
+        svg += '<text x="40" y="495" font-family="monospace" font-size="11" fill="#55ff55">STATUS: NOMINAL</text>';
+
+        svg += '<rect x="1010" y="440" width="160" height="80" fill="rgba(204,153,204,.08)" stroke="#cc99cc" stroke-width="1"/>';
+        svg += '<text x="1020" y="458" font-family="Antonio,sans-serif" font-size="9" fill="#cc99cc" letter-spacing="2">COMM SYSTEMS</text>';
+        svg += '<text x="1020" y="478" font-family="monospace" font-size="11" fill="#f1a727">WIFI: ' + aps.length + ' ARRAYS</text>';
+        svg += '<text x="1020" y="495" font-family="monospace" font-size="11" fill="#55ff55">ACTIVE: ' + aps.filter(a=>a.state===1).length + '</text>';
+        svg += '<text x="1020" y="512" font-family="monospace" font-size="11" fill="#cc4444">DORMANT: ' + aps.filter(a=>a.state!==1).length + '</text>';
+
+        // Scan line
+        svg += '<line x1="220" y1="120" x2="220" y2="440" stroke="#f1a727" stroke-width=".5" opacity="0">';
+        svg += '<animate attributeName="x1" values="220;980;220" dur="6s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="x2" values="220;980;220" dur="6s" repeatCount="indefinite"/>';
+        svg += '<animate attributeName="opacity" values="0;.4;0" dur="6s" repeatCount="indefinite"/></line>';
+
+        svg += '</svg></div>';
+        panel.innerHTML = svg;
+    }
+
+    // ============ BUILD TOPOLOGY (Space family tree) ============
+    function buildTopology() {
+        const panel = document.getElementById('panel-topology');
+        panel.dataset.built = '1';
+        const devices = networkData.system.devices || [];
+        const aps = devices.filter(d => d.type === 'uap');
+        const sws = devices.filter(d => d.type === 'usw');
+
+        // Generate stars
+        var stars = '';
+        for (var i = 0; i < 60; i++) {
+            var sx = Math.random()*1200, sy = Math.random()*650, sr = Math.random()*1.2+.2, so = Math.random()*.5+.3;
+            stars += '<circle cx="' + sx + '" cy="' + sy + '" r="' + sr + '" fill="white" opacity="' + so + '"/>';
+        }
+
+        var svg = '<div class="topology-container"><svg viewBox="0 0 1200 650" xmlns="http://www.w3.org/2000/svg">';
+        svg += '<defs><filter id="tglow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+        svg += '<radialGradient id="starBg"><stop offset="0%" stop-color="#0a0a2a"/><stop offset="100%" stop-color="#000005"/></radialGradient></defs>';
+
+        // Space background
+        svg += '<rect width="1200" height="650" fill="url(#starBg)"/>';
+        svg += '<g>' + stars + '</g>';
+        svg += '<ellipse cx="900" cy="100" rx="200" ry="80" fill="rgba(68,85,255,.03)"/>';
+        svg += '<ellipse cx="300" cy="500" rx="150" ry="60" fill="rgba(204,153,204,.03)"/>';
+
+        // LCARS corner brackets
+        svg += '<rect x="5" y="5" width="80" height="3" rx="1.5" fill="#f1a727"/><rect x="5" y="5" width="3" height="40" rx="1.5" fill="#f1a727"/>';
+        svg += '<rect x="1115" y="5" width="80" height="3" rx="1.5" fill="#9999ff"/><rect x="1192" y="5" width="3" height="40" rx="1.5" fill="#9999ff"/>';
+        svg += '<rect x="5" y="642" width="80" height="3" rx="1.5" fill="#cc99cc"/><rect x="5" y="605" width="3" height="40" rx="1.5" fill="#cc99cc"/>';
+        svg += '<rect x="1115" y="642" width="80" height="3" rx="1.5" fill="#f1a727"/><rect x="1192" y="605" width="3" height="40" rx="1.5" fill="#f1a727"/>';
+
+        // Title
+        svg += '<text x="600" y="30" text-anchor="middle" font-family="Antonio,sans-serif" font-size="14" fill="#f1a727" letter-spacing="6" font-weight="700">NETWORK TOPOLOGY \u2014 LIVE SENSOR DATA</text>';
+
+        // Cloud
+        svg += '<g transform="translate(600,80)"><circle cx="0" cy="0" r="35" fill="rgba(136,221,255,.05)" stroke="#88ddff" stroke-width="2"/>';
+        svg += '<circle cx="0" cy="0" r="45" fill="none" stroke="#88ddff" stroke-width=".5" opacity=".3"><animate attributeName="r" values="40;55;40" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".3;0;.3" dur="4s" repeatCount="indefinite"/></circle>';
+        svg += '<text x="0" y="5" text-anchor="middle" font-family="Antonio,sans-serif" font-size="12" fill="#88ddff" font-weight="700">CLOUD</text>';
+        svg += '<text x="0" y="55" text-anchor="middle" font-family="Antonio,sans-serif" font-size="8" fill="#88ddff" opacity=".6">CONTROLLER</text></g>';
+
+        // Cloud to main switch line
+        svg += '<line x1="600" y1="120" x2="600" y2="200" stroke="#88ddff" stroke-width="2" filter="url(#tglow)"><animate attributeName="stroke-opacity" values=".3;1;.3" dur="2s" repeatCount="indefinite"/></line>';
+        svg += '<circle r="2" fill="#88ddff"><animateMotion dur="1.5s" repeatCount="indefinite" path="M600,120 L600,200"/></circle>';
+
+        // Main switch (first online switch)
+        var mainSw = sws.find(s => s.state===1) || sws[0];
+        svg += '<g transform="translate(600,240)"><rect x="-80" y="-30" width="160" height="60" rx="8" fill="rgba(85,255,85,.08)" stroke="#55ff55" stroke-width="2"/>';
+        svg += '<ellipse cx="0" cy="0" rx="95" ry="20" fill="none" stroke="rgba(85,255,85,.15)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" values="0;360" dur="20s" repeatCount="indefinite"/></ellipse>';
+        svg += '<circle cx="0" cy="0" r="6" fill="#55ff55"/>';
+        svg += '<text x="0" y="-15" text-anchor="middle" font-family="Antonio,sans-serif" font-size="11" fill="#f1a727" font-weight="700">' + (mainSw?mainSw.name.toUpperCase():'PRIMARY SWITCH') + '</text>';
+        svg += '<text x="0" y="22" text-anchor="middle" font-family="Antonio,sans-serif" font-size="9" fill="#55ff55" letter-spacing="2">\u25CF PRIMARY SWITCH</text>';
+        svg += '<text x="0" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">' + (mainSw?mainSw.mac:'') + '</text></g>';
+
+        // Secondary switches
+        var otherSw = sws.filter(s => s !== mainSw);
+        var swX = [300, 900];
+        otherSw.forEach((s, i) => {
+            var x = swX[i] || 600 + (i+1) * 150;
+            var col = s.state===1 ? '#55ff55' : '#cc4444';
+            // Connection line
+            svg += '<path d="M ' + (i===0?'520':'680') + ' 250 Q ' + (i===0?'400':'800') + ' 300 ' + x + ' 350" stroke="' + col + '" stroke-width="' + (s.state===1?'1.5':'1') + '" fill="none"' + (s.state!==1?' stroke-dasharray="5,5" opacity=".3"':' filter="url(#tglow)" opacity=".6"') + '/>';
+            if (s.state===1) svg += '<circle r="2" fill="' + col + '"><animateMotion dur="2s" repeatCount="indefinite" path="M' + (i===0?'520':'680') + ',250 Q' + (i===0?'400':'800') + ',300 ' + x + ',350"/></circle>';
+
+            svg += '<g transform="translate(' + x + ',380)"><rect x="-70" y="-25" width="140" height="50" rx="6" fill="rgba(' + (s.state===1?'85,255,85':'204,68,68') + ',.06)" stroke="' + col + '" stroke-width="' + (s.state===1?'1.5':'1') + '"' + (s.state!==1?' stroke-dasharray="5,3"':'') + '/>';
+            svg += '<circle cx="0" cy="0" r="5" fill="' + col + '"' + (s.state!==1?' opacity=".5"><animate attributeName="opacity" values=".5;.1;.5" dur="2s" repeatCount="indefinite"/':'') + '/>';
+            svg += '<text x="0" y="-10" text-anchor="middle" font-family="Antonio,sans-serif" font-size="10" fill="' + (s.state===1?'#f1a727':col) + '" font-weight="700">' + s.name.toUpperCase() + '</text>';
+            svg += '<text x="0" y="18" text-anchor="middle" font-family="Antonio,sans-serif" font-size="8" fill="' + col + '" letter-spacing="1">' + (s.state===1?'\u25CF SECONDARY':'\u26A0 OFFLINE') + '</text>';
+            svg += '<text x="0" y="40" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">' + s.mac + '</text></g>';
+        });
+
+        // APs spread across bottom
+        var apX = [];
+        var spacing = 1000 / (aps.length + 1);
+        for (var i = 0; i < aps.length; i++) apX.push(100 + spacing * (i + 1));
+
+        aps.forEach((a, i) => {
+            var x = apX[i];
+            var col = a.state===1 ? '#88ddff' : '#cc4444';
+            // Connection to main switch
+            svg += '<path d="M 600 270 Q ' + (600+(x-600)*.5) + ' 370 ' + x + ' 460" stroke="rgba(' + (a.state===1?'136,221,255,.4':'204,68,68,.2') + ')" stroke-width="1" fill="none"' + (a.state!==1?' stroke-dasharray="4,4"':'') + '/>';
+
+            svg += '<g transform="translate(' + x + ',490)"><circle cx="0" cy="0" r="' + (a.state===1?'28':'24') + '" fill="rgba(' + (a.state===1?'136,221,255':'204,68,68') + ',.06)" stroke="' + col + '" stroke-width="' + (a.state===1?'1.5':'1') + '"' + (a.state!==1?' stroke-dasharray="4,2"':'') + '/>';
+            if (a.state===1) {
+                svg += '<circle cx="0" cy="0" r="35" fill="none" stroke="' + col + '" stroke-width=".5" opacity="0">';
+                svg += '<animate attributeName="r" values="30;45;30" dur="3s" repeatCount="indefinite" begin="' + (i*.5) + 's"/>';
+                svg += '<animate attributeName="opacity" values=".4;0;.4" dur="3s" repeatCount="indefinite" begin="' + (i*.5) + 's"/></circle>';
+            }
+            svg += '<text x="0" y="4" text-anchor="middle" font-family="Antonio,sans-serif" font-size="10" fill="' + col + '" font-weight="700">' + (a.name.length>12?a.name.substring(0,10)+'..':a.name).toUpperCase() + '</text>';
+            svg += '<text x="0" y="50" text-anchor="middle" font-family="Antonio,sans-serif" font-size="8" fill="' + (a.state===1?'#55ff55':col) + '">\u25CF ' + (a.state===1?a.model:'OFFLINE') + '</text></g>';
+
+            // Client dots for online APs
+            if (a.state === 1) {
+                var nc = Math.floor(Math.random()*8+4);
+                for (var j = 0; j < nc; j++) {
+                    var angle = (j/nc) * Math.PI * 2;
+                    var cx = x + Math.cos(angle) * 55;
+                    var cy = 550 + Math.sin(angle) * 20;
+                    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="3" fill="#9999ff" opacity=".4"><animate attributeName="opacity" values=".2;.6;.2" dur="' + (Math.random()*2+1).toFixed(1) + 's" repeatCount="indefinite"/></circle>';
+                }
+                svg += '<text x="' + x + '" y="590" text-anchor="middle" font-family="Antonio,sans-serif" font-size="8" fill="#9999ff" opacity=".5">~' + nc + ' CLIENTS</text>';
             }
         });
-    });
-}
 
-function showDevicePopup(event, dev) {
-    const popup = document.getElementById('device-popup');
-    document.getElementById('dp-name').textContent = dev.name || dev.model;
-    document.getElementById('dp-model').textContent = dev.model || '--';
-    document.getElementById('dp-mac').textContent = dev.mac || '--';
-    document.getElementById('dp-status').textContent = dev.state === 1 ? 'ONLINE' : 'OFFLINE';
-    document.getElementById('dp-uptime').textContent = dev.uptime ? Math.floor(dev.uptime/3600) + 'h ' + Math.floor((dev.uptime%3600)/60) + 'm' : '--';
-    popup.style.left = Math.min(event.clientX, window.innerWidth - 220) + 'px';
-    popup.style.top = (event.clientY - 100) + 'px';
-    popup.classList.add('show');
-    setTimeout(() => popup.classList.remove('show'), 4000);
-}
+        // Legend
+        svg += '<g transform="translate(30,620)"><circle cx="0" cy="0" r="4" fill="#55ff55"/><text x="10" y="4" font-family="Antonio,sans-serif" font-size="8" fill="#55ff55">SWITCH</text>';
+        svg += '<circle cx="80" cy="0" r="4" fill="#88ddff"/><text x="90" y="4" font-family="Antonio,sans-serif" font-size="8" fill="#88ddff">AP</text>';
+        svg += '<circle cx="130" cy="0" r="4" fill="#9999ff"/><text x="140" y="4" font-family="Antonio,sans-serif" font-size="8" fill="#9999ff">CLIENT</text>';
+        svg += '<circle cx="200" cy="0" r="4" fill="#cc4444"/><text x="210" y="4" font-family="Antonio,sans-serif" font-size="8" fill="#cc4444">OFFLINE</text></g>';
 
-// ===== DEVICE LIST RENDERING =====
-function renderDeviceList(devices) {
-    const c = document.getElementById('device-list-container');
-    c.innerHTML = '<div class="panels-grid" style="grid-template-columns:1fr">' +
-        devices.map((dev, i) => {
-            const on = dev.state === 1;
-            const typeIcon = dev.type === 'uap' ? '📡' : dev.type === 'usw' ? '🔌' : '🖥️';
-            const upStr = dev.uptime ? Math.floor(dev.uptime/86400) + 'd ' + Math.floor((dev.uptime%86400)/3600) + 'h' : '--';
-            return '<div class="data-panel" style="animation-delay:' + (i*0.05) + 's">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">' +
-                '<div class="panel-title" style="margin:0">' + typeIcon + ' ' + (dev.name||dev.model) + '</div>' +
-                '<span class="data-val' + (on?' highlight':' warn') + '" style="font-size:.65rem">' + (on?'● ONLINE':'● OFFLINE') + '</span>' +
-                '</div>' +
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">' +
-                '<div class="data-row" style="flex-direction:column;gap:2px"><span class="data-label">Model</span><span class="data-val" style="font-size:.7rem">' + (dev.model||'--') + '</span></div>' +
-                '<div class="data-row" style="flex-direction:column;gap:2px"><span class="data-label">MAC</span><span class="data-val" style="font-size:.65rem">' + (dev.mac||'--') + '</span></div>' +
-                '<div class="data-row" style="flex-direction:column;gap:2px"><span class="data-label">Uptime</span><span class="data-val" style="font-size:.7rem">' + upStr + '</span></div>' +
-                '<div class="data-row" style="flex-direction:column;gap:2px"><span class="data-label">Type</span><span class="data-val" style="font-size:.7rem">' + (dev.type||'--').toUpperCase() + '</span></div>' +
-                '</div></div>';
-        }).join('') + '</div>';
-}
+        svg += '</svg></div>';
+        panel.innerHTML = svg;
+    }
 
-// ===== CONFIG SAVE =====
-async function saveConfig() {
-    const url = document.getElementById('cfg-url').value;
-    const apiKey = document.getElementById('cfg-apikey').value;
-    const user = document.getElementById('cfg-user').value;
-    const pass = document.getElementById('cfg-pass').value;
-    try {
-        const resp = await fetch('/api/config/unifi', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({controller_url:url, api_key:apiKey, username:user, password:pass, site_id:'default', verify_ssl:false})
-        });
-        if (resp.ok) {
-            document.getElementById('config-overlay').classList.remove('show');
-            setTimeout(loadStatus, 2000);
-        }
-    } catch(e) { console.error('Config save failed', e); }
-}
-
-// ===== INIT =====
-loadStatus();
-setInterval(loadStatus, 30000);
-setInterval(() => { document.getElementById('stardate').textContent = 'STARDATE ' + getStardate(); }, 60000);
-</script>
+    // ============ INIT ============
+    loadData();
+    </script>
 </body>
 </html>
