@@ -59,7 +59,8 @@
         .sidebar-block:nth-child(5){background:var(--ltblue)}
         .sidebar-block:nth-child(6){background:var(--orange)}
         .sidebar-block:nth-child(7){background:var(--cyan);color:#000}
-        .sidebar-block:nth-child(8){background:var(--red);flex:1;border-radius:0 0 0 20px;align-items:flex-start;padding-top:10px}
+        .sidebar-block:nth-child(8){background:linear-gradient(135deg,#0066ff,#00ccff);color:#fff}
+        .sidebar-block:nth-child(9){background:var(--red);flex:1;border-radius:0 0 0 20px;align-items:flex-start;padding-top:10px}
 
         /* CONTENT AREA */
         .lcars-content{flex:1;display:flex;flex-direction:column;gap:4px;overflow:hidden}
@@ -124,6 +125,60 @@
         .pulse-meter .meter-value{font-size:32px;color:var(--gold);font-weight:700}
         .pulse-meter .meter-bar{height:6px;background:#222;margin-top:10px;border-radius:3px;overflow:hidden}
         .pulse-meter .meter-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:3px;transition:width .5s}
+
+        /* ===== MODERN STAR TREK UI ===== */
+        .modern-wrapper{position:fixed;inset:0;background:#030812;z-index:10000;overflow:hidden;font-family:'Orbitron','Antonio',sans-serif;color:#c0d8f0}
+        .modern-wrapper::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(0,100,255,.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(0,200,255,.05) 0%,transparent 50%),linear-gradient(0deg,rgba(0,150,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.02) 1px,transparent 1px);background-size:100% 100%,100% 100%,40px 40px,40px 40px;pointer-events:none}
+        .modern-topbar{height:56px;display:flex;align-items:center;padding:0 30px;border-bottom:1px solid rgba(0,150,255,.15);background:rgba(5,15,30,.9);backdrop-filter:blur(20px);position:relative;z-index:2}
+        .modern-topbar .logo{font-size:18px;font-weight:900;letter-spacing:6px;color:#fff;text-transform:uppercase}
+        .modern-topbar .logo span{color:#00aaff;font-weight:400}
+        .modern-topbar .nav-pills{display:flex;gap:3px;margin-left:40px}
+        .modern-topbar .nav-pill{padding:8px 18px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(192,216,240,.5);cursor:pointer;transition:all .3s;border:1px solid transparent;border-radius:4px;font-family:'Orbitron',sans-serif}
+        .modern-topbar .nav-pill:hover{color:#00aaff;border-color:rgba(0,170,255,.2);background:rgba(0,170,255,.05)}
+        .modern-topbar .nav-pill.active{color:#00ccff;border-color:rgba(0,200,255,.3);background:rgba(0,200,255,.08)}
+        .modern-topbar .status-bar{margin-left:auto;display:flex;gap:30px;align-items:center}
+        .modern-topbar .status-badge{font-size:10px;letter-spacing:2px;color:rgba(192,216,240,.4)}
+        .modern-topbar .status-badge .sv{color:#00ccff;font-size:13px;margin-left:5px;font-weight:700}
+        .modern-topbar .status-badge .sv.warn{color:#ff6644}
+        .modern-content{display:flex;height:calc(100vh - 84px);position:relative;z-index:2}
+        .modern-rail{width:280px;border-right:1px solid rgba(0,150,255,.1);padding:20px;overflow-y:auto;background:rgba(5,12,25,.5)}
+        .rail-card{background:rgba(0,100,255,.04);border:1px solid rgba(0,150,255,.1);border-radius:8px;padding:16px;margin-bottom:12px;transition:all .3s}
+        .rail-card:hover{border-color:rgba(0,150,255,.25);background:rgba(0,100,255,.08)}
+        .rail-card .rc-label{font-size:9px;letter-spacing:3px;color:rgba(192,216,240,.4);margin-bottom:6px;text-transform:uppercase}
+        .rail-card .rc-value{font-size:32px;font-weight:700;color:#fff;line-height:1}
+        .rail-card .rc-value.success{color:#00ee88}
+        .rail-card .rc-value.danger{color:#ff5544}
+        .rail-card .rc-value.info{color:#00aaff}
+        .rail-card .rc-sub{font-size:10px;color:rgba(192,216,240,.3);margin-top:4px;letter-spacing:1px}
+        .ring-container{display:flex;align-items:center;gap:15px;margin-top:8px}
+        .ring-svg{width:50px;height:50px}
+        .ring-bg{fill:none;stroke:rgba(0,150,255,.1);stroke-width:4}
+        .ring-fg{fill:none;stroke:#00ccff;stroke-width:4;stroke-linecap:round}
+        .modern-main{flex:1;padding:25px;overflow-y:auto}
+        .holo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:15px}
+        .holo-card{background:rgba(0,60,120,.06);border:1px solid rgba(0,150,255,.12);border-radius:12px;padding:20px;transition:all .4s;position:relative;overflow:hidden}
+        .holo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,200,255,.4),transparent);opacity:0;transition:opacity .4s}
+        .holo-card:hover{border-color:rgba(0,200,255,.3);background:rgba(0,60,120,.12);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,100,255,.1)}
+        .holo-card:hover::before{opacity:1}
+        .holo-card .hc-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+        .holo-card .hc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+        .hc-icon.online{background:rgba(0,238,136,.1);border:1px solid rgba(0,238,136,.3)}
+        .hc-icon.offline{background:rgba(255,85,68,.1);border:1px solid rgba(255,85,68,.3)}
+        .holo-card .hc-name{font-size:15px;font-weight:700;color:#fff}
+        .holo-card .hc-model{font-size:10px;color:rgba(192,216,240,.4);letter-spacing:1px}
+        .holo-card .hc-status{font-size:11px;display:flex;align-items:center;gap:6px}
+        .hc-status .dot{width:8px;height:8px;border-radius:50%}
+        .hc-status .dot.on{background:#00ee88;box-shadow:0 0 10px #00ee88}
+        .hc-status .dot.off{background:#ff5544;box-shadow:0 0 10px #ff5544;animation:blink 1.5s ease infinite}
+        .holo-card .hc-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,150,255,.08)}
+        .hc-detail-item .hcd-label{font-size:10px;color:rgba(192,216,240,.3);letter-spacing:1px;margin-bottom:2px}
+        .hc-detail-item .hcd-value{font-size:10px;color:rgba(192,216,240,.7);font-family:monospace}
+        .modern-section{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:rgba(192,216,240,.3);margin:30px 0 15px;padding-bottom:8px;border-bottom:1px solid rgba(0,150,255,.08)}
+        .modern-section:first-child{margin-top:0}
+        .modern-back{position:absolute;bottom:50px;right:20px;background:rgba(0,100,255,.1);border:1px solid rgba(0,150,255,.2);color:#00aaff;padding:10px 25px;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:6px;z-index:3;transition:all .3s}
+        .modern-back:hover{background:rgba(0,100,255,.2);border-color:rgba(0,200,255,.4)}
+        .modern-footer{position:absolute;bottom:0;left:0;right:0;height:28px;background:rgba(5,15,30,.95);border-top:1px solid rgba(0,150,255,.1);display:flex;align-items:center;padding:0 20px;font-size:9px;letter-spacing:3px;color:rgba(192,216,240,.2);z-index:3}
+        .modern-footer .mf-dot{width:6px;height:6px;border-radius:50%;background:#00ee88;margin-right:8px;box-shadow:0 0 6px #00ee88}
     </style>
 </head>
 <body>
@@ -156,6 +211,7 @@
             <div class="sidebar-block" data-view="stalker" onclick="switchView('stalker')">WI-FI TRACK</div>
             <div class="sidebar-block" data-view="threats" onclick="switchView('threats')">THREAT WATCH</div>
             <div class="sidebar-block" data-view="pulse" onclick="switchView('pulse')">NET PULSE</div>
+            <div class="sidebar-block" data-view="modern" onclick="switchView('modern')">MODERN UI</div>
             <div class="sidebar-block" data-view="settings" onclick="switchView('settings')">CONFIG</div>
         </div>
 
@@ -174,6 +230,7 @@
                 <div class="view-panel" id="panel-stalker"></div>
                 <div class="view-panel" id="panel-threats"></div>
                 <div class="view-panel" id="panel-pulse"></div>
+                <div class="view-panel" id="panel-modern"></div>
                 <div class="view-panel" id="panel-settings"></div>
             </div>
 
@@ -198,12 +255,13 @@
             overview:['SYSTEM OVERVIEW','ACTIVE'],deckplan:['VESSEL SCHEMATIC','DECK 1'],
             topology:['NETWORK TOPOLOGY','LIVE'],devices:['DEVICE REGISTRY','ALL SYSTEMS'],
             stalker:['WI-FI TRACKING','MONITORING'],threats:['THREAT ANALYSIS','SHIELDS UP'],
-            pulse:['NETWORK PULSE','REAL-TIME'],settings:['CONFIGURATION','AUTHORIZED']
+            pulse:['NETWORK PULSE','REAL-TIME'],modern:['MODERN INTERFACE','NEXT GEN'],settings:['CONFIGURATION','AUTHORIZED']
         };
         document.getElementById('view-label').textContent = labels[view][0];
         document.getElementById('view-info').textContent = labels[view][1];
         if (view === 'topology' && !document.getElementById('panel-topology').dataset.built) buildTopology();
         if (view === 'deckplan' && !document.getElementById('panel-deckplan').dataset.built) buildDeckPlan();
+        if (view === 'modern') buildModernUI();
     }
 
     function getStardate() {
@@ -681,6 +739,62 @@
 
         svg += '</svg></div>';
         panel.innerHTML = svg;
+    }
+
+
+    // ============ BUILD MODERN UI ============
+    function buildModernUI() {
+        var overlay = document.getElementById('modern-overlay');
+        if (overlay) { overlay.style.display = 'block'; return; }
+        var sys = networkData.system;
+        var devices = sys.devices || [];
+        var online = devices.filter(function(d){return d.state===1}).length;
+        var offline = devices.filter(function(d){return d.state!==1}).length;
+        var aps = devices.filter(function(d){return d.type==='uap'});
+        var sws = devices.filter(function(d){return d.type==='usw'});
+        var pct = Math.round(online/devices.length*100);
+        var circ = 2 * Math.PI * 20;
+        var offset = circ - (pct/100) * circ;
+        var h = '<div class="modern-wrapper" id="modern-overlay">';
+        h += '<div class="modern-topbar"><div class="logo">NETCMD<span> // FEDERATION</span></div>';
+        h += '<div class="nav-pills"><div class="nav-pill active">DASHBOARD</div><div class="nav-pill">FLEET</div><div class="nav-pill">SIGNALS</div><div class="nav-pill">DEFENSE</div></div>';
+        h += '<div class="status-bar"><div class="status-badge">GATEWAY <span class="sv">' + sys.gateway_model + '</span></div>';
+        h += '<div class="status-badge">NODES <span class="sv">' + devices.length + '</span></div>';
+        h += '<div class="status-badge">ENDPOINTS <span class="sv">' + (sys.num_clients||0) + '</span></div>';
+        h += '<div class="status-badge">HEALTH <span class="sv ' + (offline>0?'warn':'') + '">' + (offline>0?'DEGRADED':'OPTIMAL') + '</span></div></div></div>';
+        h += '<div class="modern-content"><div class="modern-rail">';
+        h += '<div class="rail-card"><div class="rc-label">Total Infrastructure</div><div class="rc-value">' + devices.length + '</div><div class="rc-sub">' + aps.length + ' wireless arrays \u00B7 ' + sws.length + ' core switches</div></div>';
+        h += '<div class="rail-card"><div class="rc-label">Systems Active</div><div class="rc-value success">' + online + '</div>';
+        h += '<div class="ring-container"><svg class="ring-svg" viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="20"/><circle class="ring-fg" cx="22" cy="22" r="20" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 22 22)" style="stroke:' + (offline>0?'#ff6644':'#00ee88') + '"/></svg><span class="ring-label">' + pct + '% operational</span></div></div>';
+        h += '<div class="rail-card"><div class="rc-label">Systems Offline</div><div class="rc-value danger">' + offline + '</div><div class="rc-sub">' + (offline>0?'Attention required':'All clear') + '</div></div>';
+        h += '<div class="rail-card"><div class="rc-label">Connected Endpoints</div><div class="rc-value info">' + (sys.num_clients||0) + '</div><div class="rc-sub">across ' + aps.filter(function(a){return a.state===1}).length + ' active arrays</div></div>';
+        h += '<div class="rail-card"><div class="rc-label">Max Uptime</div><div class="rc-value" style="font-size:22px;color:rgba(192,216,240,.7)">' + formatUptime(Math.max.apply(null,devices.filter(function(d){return d.uptime}).map(function(d){return d.uptime}))) + '</div><div class="rc-sub">most stable node</div></div>';
+        h += '<div class="rail-card" style="border-color:rgba(0,238,136,.15)"><div class="rc-label">Network Class</div><div class="rc-value" style="font-size:14px;color:rgba(192,216,240,.6)">' + sys.gateway_model + '</div><div class="rc-sub">cloud-managed infrastructure</div></div>';
+        h += '</div><div class="modern-main">';
+        h += '<div class="modern-section">Wireless Arrays</div><div class="holo-grid">';
+        aps.forEach(function(d) {
+            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">\uD83D\uDCE1</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
+            h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
+            if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
+            h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Access Point</div></div></div></div>';
+        });
+        h += '</div><div class="modern-section">Core Switches</div><div class="holo-grid">';
+        sws.forEach(function(d) {
+            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">\u26A1</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
+            h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
+            if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
+            h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Switch</div></div></div></div>';
+        });
+        h += '</div></div></div>';
+        h += '<div class="modern-footer"><div class="mf-dot"></div><span>NETWORK COMMAND INTERFACE v3.0 &nbsp;|&nbsp; M33HAN &nbsp;|&nbsp; STARDATE ' + getStardate() + '</span><span style="margin-left:auto">FEDERATION NETWORK OPERATIONS</span></div>';
+        h += '<button class="modern-back" onclick="closeModern()">\u25C4 LCARS MODE</button></div>';
+        document.body.insertAdjacentHTML('beforeend', h);
+    }
+
+    function closeModern() {
+        var overlay = document.getElementById('modern-overlay');
+        if (overlay) overlay.style.display = 'none';
+        switchView('overview');
     }
 
     // ============ INIT ============
