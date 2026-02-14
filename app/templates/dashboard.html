@@ -785,52 +785,195 @@
 
 
     // ============ BUILD MODERN UI ============
+    function switchModernTab(tabName) {
+      document.querySelectorAll('.nav-pill').forEach(function(p) { p.classList.remove('active'); });
+      event.target.classList.add('active');
+      document.querySelectorAll('.modern-tab-panel').forEach(function(p) { p.style.display = 'none'; });
+      var panel = document.getElementById('mtab-' + tabName);
+      if (panel) panel.style.display = 'block';
+    }
+
     function buildModernUI() {
-        var overlay = document.getElementById('modern-overlay');
-        if (overlay) { overlay.style.display = 'block'; return; }
-        var sys = networkData.system;
-        var devices = sys.devices || [];
-        var online = devices.filter(function(d){return d.state===1}).length;
-        var offline = devices.filter(function(d){return d.state!==1}).length;
-        var aps = devices.filter(function(d){return d.type==='uap'});
-        var sws = devices.filter(function(d){return d.type==='usw'});
-        var pct = Math.round(online/devices.length*100);
-        var circ = 2 * Math.PI * 20;
-        var offset = circ - (pct/100) * circ;
-        var h = '<div class="modern-wrapper" id="modern-overlay">';
-        h += '<div class="modern-topbar"><div class="logo">NETCMD<span> // FIREWIRE NETWORKS</span></div>';
-        h += '<div class="nav-pills"><div class="nav-pill active">DASHBOARD</div><div class="nav-pill">FLEET</div><div class="nav-pill">SIGNALS</div><div class="nav-pill">DEFENSE</div></div>';
-        h += '<div class="status-bar"><div class="status-badge">GATEWAY <span class="sv">' + sys.gateway_model + '</span></div>';
-        h += '<div class="status-badge">NODES <span class="sv">' + devices.length + '</span></div>';
-        h += '<div class="status-badge">ENDPOINTS <span class="sv">' + (sys.num_clients||0) + '</span></div>';
-        h += '<div class="status-badge">HEALTH <span class="sv ' + (offline>0?'warn':'') + '">' + (offline>0?'DEGRADED':'OPTIMAL') + '</span></div></div></div>';
-        h += '<div class="modern-content"><div class="modern-rail">';
-        h += '<div class="rail-card"><div class="rc-label">Total Infrastructure</div><div class="rc-value">' + devices.length + '</div><div class="rc-sub">' + aps.length + ' wireless arrays \u00B7 ' + sws.length + ' core switches</div></div>';
-        h += '<div class="rail-card"><div class="rc-label">Systems Active</div><div class="rc-value success">' + online + '</div>';
-        h += '<div class="ring-container"><svg class="ring-svg" viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="20"/><circle class="ring-fg" cx="22" cy="22" r="20" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 22 22)" style="stroke:' + (offline>0?'#ff6644':'#00ee88') + '"/></svg><span class="ring-label">' + pct + '% operational</span></div></div>';
-        h += '<div class="rail-card"><div class="rc-label">Systems Offline</div><div class="rc-value danger">' + offline + '</div><div class="rc-sub">' + (offline>0?'Attention required':'All clear') + '</div></div>';
-        h += '<div class="rail-card"><div class="rc-label">Connected Endpoints</div><div class="rc-value info">' + (sys.num_clients||0) + '</div><div class="rc-sub">across ' + aps.filter(function(a){return a.state===1}).length + ' active arrays</div></div>';
-        h += '<div class="rail-card"><div class="rc-label">Max Uptime</div><div class="rc-value" style="font-size:22px;color:rgba(192,216,240,.7)">' + formatUptime(Math.max.apply(null,devices.filter(function(d){return d.uptime}).map(function(d){return d.uptime}))) + '</div><div class="rc-sub">most stable node</div></div>';
-        h += '<div class="rail-card" style="border-color:rgba(0,238,136,.15)"><div class="rc-label">Network Class</div><div class="rc-value" style="font-size:14px;color:rgba(192,216,240,.6)">' + sys.gateway_model + '</div><div class="rc-sub">cloud-managed infrastructure</div></div>';
-        h += '</div><div class="modern-main">';
-        h += '<div class="modern-section">Wireless Arrays</div><div class="holo-grid">';
-        aps.forEach(function(d) {
-            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:32px;height:32px;object-fit:contain" onerror="this.outerHTML=\'\uD83D\uDCE1\'">':'\uD83D\uDCE1') + '</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
-            h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
-            if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
-            h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Access Point</div></div></div></div>';
-        });
-        h += '</div><div class="modern-section">Core Switches</div><div class="holo-grid">';
-        sws.forEach(function(d) {
-            h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:32px;height:32px;object-fit:contain" onerror="this.outerHTML=\'\u26A1\'">':'\u26A1') + '</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
-            h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
-            if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
-            h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Switch</div></div></div></div>';
-        });
-        h += '</div></div></div>';
-        h += '<div class="modern-footer"><div class="mf-dot"></div><span>NETWORK COMMAND INTERFACE v3.0 &nbsp;|&nbsp; M33HAN &nbsp;|&nbsp; STARDATE ' + getStardate() + '</span><span style="margin-left:auto">FIREWIRE NETWORKS LTD</span></div>';
-        h += '<button class="modern-back" onclick="closeModern()">\u25C4 MEEHAN MODE</button></div>';
-        document.body.insertAdjacentHTML('beforeend', h);
+      var overlay = document.getElementById('modern-overlay');
+      if (overlay) { overlay.style.display = 'block'; return; }
+      var sys = networkData.system;
+      var devices = sys.devices || [];
+      var online = devices.filter(function(d){return d.state===1}).length;
+      var offline = devices.filter(function(d){return d.state!==1}).length;
+      var aps = devices.filter(function(d){return d.type==='uap'});
+      var sws = devices.filter(function(d){return d.type==='usw'});
+      var pct = Math.round(online/devices.length*100);
+      var circ = 2*Math.PI*20;
+      var offset = circ-(pct/100)*circ;
+
+      var h = '<div class="modern-wrapper" id="modern-overlay">';
+      // TOP BAR
+      h += '<div class="modern-topbar"><div class="logo">NETCMD<span> // FIREWIRE NETWORKS</span></div>';
+      h += '<div class="nav-pills">';
+      h += '<div class="nav-pill active" onclick="switchModernTab(\'dashboard\')">DASHBOARD</div>';
+      h += '<div class="nav-pill" onclick="switchModernTab(\'fleet\')">FLEET</div>';
+      h += '<div class="nav-pill" onclick="switchModernTab(\'signals\')">SIGNALS</div>';
+      h += '<div class="nav-pill" onclick="switchModernTab(\'defense\')">DEFENSE</div>';
+      h += '</div>';
+      h += '<div class="status-bar"><div class="status-badge">GATEWAY <span class="sv">' + sys.gateway_model + '</span></div>';
+      h += '<div class="status-badge">NODES <span class="sv">' + devices.length + '</span></div>';
+      h += '<div class="status-badge">ENDPOINTS <span class="sv">' + (sys.num_clients||0) + '</span></div>';
+      h += '<div class="status-badge">HEALTH <span class="sv ' + (offline>0?'warn':'') + '">' + (offline>0?'DEGRADED':'OPTIMAL') + '</span></div></div></div>';
+
+      // CONTENT AREA
+      h += '<div class="modern-content"><div class="modern-rail">';
+      h += '<div class="rail-card"><div class="rc-label">Total Infrastructure</div><div class="rc-value">' + devices.length + '</div><div class="rc-sub">' + aps.length + ' wireless arrays \u00B7 ' + sws.length + ' core switches</div></div>';
+      h += '<div class="rail-card"><div class="rc-label">Systems Active</div><div class="rc-value success">' + online + '</div>';
+      h += '<div class="ring-container"><svg class="ring-svg" viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="20"/><circle class="ring-fg" cx="22" cy="22" r="20" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 22 22)" style="stroke:' + (offline>0?'#ff6644':'#00ee88') + '"/></svg><span class="ring-label">' + pct + '% operational</span></div></div>';
+      h += '<div class="rail-card"><div class="rc-label">Systems Offline</div><div class="rc-value danger">' + offline + '</div><div class="rc-sub">' + (offline>0?'Attention required':'All clear') + '</div></div>';
+      h += '<div class="rail-card"><div class="rc-label">Connected Endpoints</div><div class="rc-value info">' + (sys.num_clients||0) + '</div><div class="rc-sub">across ' + aps.filter(function(a){return a.state===1}).length + ' active arrays</div></div>';
+      h += '<div class="rail-card"><div class="rc-label">Max Uptime</div><div class="rc-value" style="font-size:22px;color:rgba(192,216,240,.7)">' + formatUptime(Math.max.apply(null,devices.filter(function(d){return d.uptime}).map(function(d){return d.uptime}))) + '</div><div class="rc-sub">most stable node</div></div>';
+      h += '<div class="rail-card" style="border-color:rgba(0,238,136,.15)"><div class="rc-label">Network Class</div><div class="rc-value" style="font-size:14px;color:rgba(192,216,240,.6)">' + sys.gateway_model + '</div><div class="rc-sub">cloud-managed infrastructure</div></div>';
+      h += '</div><div class="modern-main">';
+
+      // === DASHBOARD TAB ===
+      h += '<div class="modern-tab-panel" id="mtab-dashboard" style="display:block">';
+      h += '<div class="modern-section">Wireless Arrays</div><div class="holo-grid">';
+      aps.forEach(function(d) {
+        h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:32px;height:32px;object-fit:contain" onerror="this.outerHTML=\'\u1F4E1\'">':'\u1F4E1') + '</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
+        h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
+        if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
+        h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Access Point</div></div></div></div>';
+      });
+      h += '</div><div class="modern-section">Core Switches</div><div class="holo-grid">';
+      sws.forEach(function(d) {
+        h += '<div class="holo-card"><div class="hc-header"><div class="hc-icon ' + (d.state===1?'online':'offline') + '">' + (getDeviceImg(d.model)?'<img src="'+getDeviceImg(d.model)+'" style="width:32px;height:32px;object-fit:contain" onerror="this.outerHTML=\'\u26A1\'">':'\u26A1') + '</div><div><div class="hc-name">' + d.name + '</div><div class="hc-model">' + d.model + '</div></div></div>';
+        h += '<div class="hc-status"><div class="dot ' + (d.state===1?'on':'off') + '"></div><span style="color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?'OPERATIONAL':'OFFLINE') + '</span>';
+        if (d.state===1) h += '<span style="color:rgba(192,216,240,.3);margin-left:auto">' + formatUptime(d.uptime) + '</span>';
+        h += '</div><div class="hc-details"><div class="hc-detail-item"><div class="hcd-label">MAC</div><div class="hcd-value">' + d.mac + '</div></div><div class="hc-detail-item"><div class="hcd-label">TYPE</div><div class="hcd-value">Switch</div></div></div></div>';
+      });
+      h += '</div></div>';
+
+      // === FLEET TAB ===
+      h += '<div class="modern-tab-panel" id="mtab-fleet" style="display:none">';
+      h += '<div class="modern-section">Fleet Registry \u2014 ' + devices.length + ' Nodes</div>';
+      h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;font-family:Orbitron,monospace">';
+      h += '<thead><tr style="border-bottom:1px solid rgba(0,150,255,.2)">';
+      h += '<th style="text-align:left;padding:12px 10px;color:#00aaff;letter-spacing:2px;font-size:9px">STATUS</th>';
+      h += '<th style="text-align:left;padding:12px 10px;color:#00aaff;letter-spacing:2px;font-size:9px">DESIGNATION</th>';
+      h += '<th style="text-align:left;padding:12px 10px;color:#00aaff;letter-spacing:2px;font-size:9px">CLASS</th>';
+      h += '<th style="text-align:left;padding:12px 10px;color:#00aaff;letter-spacing:2px;font-size:9px">MODEL</th>';
+      h += '<th style="text-align:left;padding:12px 10px;color:#00aaff;letter-spacing:2px;font-size:9px">MAC ADDRESS</th>';
+      h += '<th style="text-align:left;padding:12px 10px;color:#00aaff;letter-spacing:2px;font-size:9px">UPTIME</th>';
+      h += '</tr></thead><tbody>';
+      devices.forEach(function(d) {
+        h += '<tr style="border-bottom:1px solid rgba(0,150,255,.05);transition:all .2s" onmouseenter="this.style.background=\'rgba(0,100,255,.08)\'" onmouseleave="this.style.background=\'transparent\'">';
+        h += '<td style="padding:14px 10px"><div style="width:10px;height:10px;border-radius:50%;background:' + (d.state===1?'#00ee88':'#ff5544') + ';box-shadow:0 0 8px ' + (d.state===1?'#00ee88':'#ff5544') + '"></div></td>';
+        h += '<td style="padding:14px 10px;color:#fff;font-weight:700;font-size:13px">' + d.name + '</td>';
+        h += '<td style="padding:14px 10px;color:rgba(192,216,240,.5)">' + (d.type==='uap'?'Wireless Array':'Core Switch') + '</td>';
+        h += '<td style="padding:14px 10px;color:#00aaff">' + d.model + '</td>';
+        h += '<td style="padding:14px 10px;color:rgba(192,216,240,.3);font-family:monospace;font-size:11px">' + d.mac + '</td>';
+        h += '<td style="padding:14px 10px;color:' + (d.state===1?'#00ee88':'#ff5544') + '">' + (d.state===1?formatUptime(d.uptime):'OFFLINE') + '</td>';
+        h += '</tr>';
+      });
+      h += '</tbody></table></div>';
+      h += '<div class="modern-section" style="margin-top:25px">Fleet Distribution</div>';
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">';
+      h += '<div style="background:rgba(0,238,136,.04);border:1px solid rgba(0,238,136,.15);border-radius:8px;padding:20px;text-align:center"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,238,136,.5);margin-bottom:8px">WIRELESS ARRAYS</div><div style="font-size:42px;font-weight:700;color:#00ee88">' + aps.length + '</div><div style="font-size:10px;color:rgba(192,216,240,.3);margin-top:5px">' + aps.filter(function(a){return a.state===1}).length + ' online / ' + aps.filter(function(a){return a.state!==1}).length + ' offline</div></div>';
+      h += '<div style="background:rgba(0,170,255,.04);border:1px solid rgba(0,170,255,.15);border-radius:8px;padding:20px;text-align:center"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,170,255,.5);margin-bottom:8px">CORE SWITCHES</div><div style="font-size:42px;font-weight:700;color:#00aaff">' + sws.length + '</div><div style="font-size:10px;color:rgba(192,216,240,.3);margin-top:5px">' + sws.filter(function(s){return s.state===1}).length + ' online / ' + sws.filter(function(s){return s.state!==1}).length + ' offline</div></div>';
+      h += '</div></div>';
+
+      // === SIGNALS TAB ===
+      h += '<div class="modern-tab-panel" id="mtab-signals" style="display:none">';
+      h += '<div class="modern-section">Real-Time Telemetry</div>';
+      h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px">';
+      h += '<div style="background:rgba(0,238,136,.04);border:1px solid rgba(0,238,136,.12);border-radius:10px;padding:20px;text-align:center"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,238,136,.4);margin-bottom:8px">NODES ONLINE</div><div style="font-size:36px;font-weight:700;color:#00ee88">' + online + '<span style="font-size:16px;color:rgba(192,216,240,.3)">/' + devices.length + '</span></div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:12px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#00ee88,#00ccff);border-radius:2px"></div></div></div>';
+      h += '<div style="background:rgba(0,170,255,.04);border:1px solid rgba(0,170,255,.12);border-radius:10px;padding:20px;text-align:center"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,170,255,.4);margin-bottom:8px">ACTIVE CLIENTS</div><div style="font-size:36px;font-weight:700;color:#00aaff">' + (sys.num_clients||0) + '</div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:12px;overflow:hidden"><div style="height:100%;width:' + Math.min((sys.num_clients||0)*2,100) + '%;background:linear-gradient(90deg,#00aaff,#cc99ff);border-radius:2px"></div></div></div>';
+      h += '<div style="background:rgba(255,102,68,.04);border:1px solid rgba(255,102,68,.12);border-radius:10px;padding:20px;text-align:center"><div style="font-size:9px;letter-spacing:3px;color:rgba(255,102,68,.4);margin-bottom:8px">ALERTS</div><div style="font-size:36px;font-weight:700;color:' + (offline>0?'#ff6644':'#00ee88') + '">' + offline + '</div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:12px;overflow:hidden"><div style="height:100%;width:' + (offline>0?Math.round(offline/devices.length*100):'0') + '%;background:linear-gradient(90deg,#ff6644,#ff4444);border-radius:2px"></div></div></div>';
+      h += '</div>';
+      h += '<div class="modern-section">Node Heartbeat</div>';
+      h += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(devices.length,8) + ',1fr);gap:8px">';
+      devices.forEach(function(d) {
+        h += '<div style="background:rgba(0,60,120,.06);border:1px solid rgba(' + (d.state===1?'0,150,255,.12':'255,85,68,.15') + ');border-radius:8px;padding:15px;text-align:center;transition:all .3s">';
+        h += '<div style="width:12px;height:12px;border-radius:50%;background:' + (d.state===1?'#00ee88':'#ff5544') + ';margin:0 auto 8px;box-shadow:0 0 10px ' + (d.state===1?'rgba(0,238,136,.5)':'rgba(255,85,68,.5)') + '"></div>';
+        h += '<div style="font-size:10px;color:' + (d.state===1?'#fff':'rgba(192,216,240,.3)') + ';font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + d.name + '</div>';
+        h += '<div style="font-size:8px;color:rgba(192,216,240,.2);letter-spacing:1px">' + (d.type==='uap'?'AP':'SW') + '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+      h += '<div class="modern-section" style="margin-top:20px">Signal Stream</div>';
+      h += '<div id="modern-signal-log" style="background:rgba(0,10,20,.5);border:1px solid rgba(0,150,255,.08);border-radius:8px;padding:15px;font-family:monospace;font-size:11px;height:180px;overflow-y:auto;color:rgba(192,216,240,.3)"></div>';
+      h += '</div>';
+
+      // === DEFENSE TAB ===
+      h += '<div class="modern-tab-panel" id="mtab-defense" style="display:none">';
+      h += '<div class="modern-section">Defense Status</div>';
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:20px">';
+      h += '<div style="background:rgba(255,85,68,.04);border:1px solid rgba(255,85,68,.15);border-radius:10px;padding:20px"><div style="font-size:9px;letter-spacing:3px;color:rgba(255,85,68,.5);margin-bottom:8px">IDS / IPS</div><div style="font-size:18px;font-weight:700;color:#ff6644">UNAVAILABLE</div><div style="font-size:10px;color:rgba(192,216,240,.3);margin-top:5px">Requires local gateway</div></div>';
+      h += '<div style="background:rgba(255,170,0,.04);border:1px solid rgba(255,170,0,.15);border-radius:10px;padding:20px"><div style="font-size:9px;letter-spacing:3px;color:rgba(255,170,0,.5);margin-bottom:8px">THREAT LEVEL</div><div style="font-size:18px;font-weight:700;color:#ffaa00">UNKNOWN</div><div style="font-size:10px;color:rgba(192,216,240,.3);margin-top:5px">No sensor data</div></div>';
+      h += '<div style="background:rgba(0,238,136,.04);border:1px solid rgba(0,238,136,.15);border-radius:10px;padding:20px"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,238,136,.5);margin-bottom:8px">ENCRYPTION</div><div style="font-size:18px;font-weight:700;color:#00ee88">ACTIVE</div><div style="font-size:10px;color:rgba(192,216,240,.3);margin-top:5px">WPA3/WPA2 enabled</div></div>';
+      h += '</div>';
+      h += '<div class="modern-section">Threat Intelligence Lookup</div>';
+      h += '<div style="background:rgba(0,60,120,.06);border:1px solid rgba(0,150,255,.12);border-radius:10px;padding:25px">';
+      h += '<div style="font-size:10px;letter-spacing:3px;color:rgba(192,216,240,.3);margin-bottom:12px">ABUSEIPDB REPUTATION CHECK</div>';
+      h += '<div style="display:flex;gap:10px"><input type="text" id="modern-ip-input" placeholder="Enter IP address..." style="flex:1;background:rgba(0,10,20,.5);border:1px solid rgba(0,150,255,.15);border-radius:6px;color:#fff;padding:12px 16px;font-family:Orbitron,monospace;font-size:12px;outline:none;transition:border .3s" onfocus="this.style.borderColor=\'rgba(0,200,255,.4)\'" onblur="this.style.borderColor=\'rgba(0,150,255,.15)\'">';
+      h += '<button onclick="modernIpLookup()" style="background:linear-gradient(135deg,rgba(0,100,255,.2),rgba(0,200,255,.1));border:1px solid rgba(0,200,255,.3);color:#00ccff;padding:12px 24px;font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:2px;cursor:pointer;border-radius:6px;transition:all .3s" onmouseenter="this.style.background=\'rgba(0,150,255,.3)\'" onmouseleave="this.style.background=\'linear-gradient(135deg,rgba(0,100,255,.2),rgba(0,200,255,.1))\'">ANALYZE</button></div>';
+      h += '<div id="modern-ip-result" style="margin-top:15px"></div></div>';
+      h += '<div class="modern-section" style="margin-top:20px">Security Advisory</div>';
+      h += '<div style="background:rgba(255,170,0,.04);border:1px solid rgba(255,170,0,.12);border-radius:10px;padding:20px">';
+      h += '<div style="font-size:12px;font-weight:700;color:#ffaa00;margin-bottom:8px">\u26A0 Cloud-Hosted Configuration</div>';
+      h += '<div style="font-size:12px;color:rgba(192,216,240,.4);line-height:1.6">Your network uses a cloud-managed gateway. For full threat detection capabilities including IDS/IPS, deep packet inspection, GeoIP threat mapping, and real-time intrusion alerts, deploy a UniFi Dream Machine, Cloud Gateway, or UXG appliance.</div></div>';
+      h += '<div style="background:rgba(0,170,255,.04);border:1px solid rgba(0,170,255,.12);border-radius:10px;padding:20px;margin-top:12px">';
+      h += '<div style="font-size:12px;font-weight:700;color:#00aaff;margin-bottom:8px">Network Hardening Checklist</div>';
+      h += '<div style="font-size:12px;color:rgba(192,216,240,.4);line-height:1.8">';
+      h += '\u2713 WPA3 / WPA2-Enterprise encryption<br>';
+      h += '\u2713 VLAN segmentation for IoT devices<br>';
+      h += '\u2713 Guest network isolation<br>';
+      h += '\u25CB Deploy local gateway for IDS/IPS<br>';
+      h += '\u25CB Enable AbuseIPDB threat intelligence<br>';
+      h += '\u25CB Configure automated threat blocking</div></div>';
+      h += '</div>';
+
+      h += '</div></div>';
+
+      // FOOTER
+      h += '<div class="modern-footer"><div class="mf-dot"></div><span>NETWORK COMMAND INTERFACE v3.0 &nbsp;|&nbsp; M33HAN &nbsp;|&nbsp; STARDATE ' + getStardate() + '</span><span style="margin-left:auto">FIREWIRE NETWORKS LTD</span></div>';
+      h += '<button class="modern-back" onclick="closeModern()">\u25C4 MEEHAN MODE</button></div>';
+      document.body.insertAdjacentHTML('beforeend', h);
+
+      // Start signal log
+      var sigEntries = [
+        {c:'#00ee88',m:'Health check: All primary systems nominal'},
+        {c:'#00aaff',m:'Wireless signal: optimal across all active arrays'},
+        {c:'#ffaa00',m:'Attention: ' + offline + ' node(s) reporting offline status'},
+        {c:'#cc99ff',m:'Client association: ' + (sys.num_clients||0) + ' endpoints connected'},
+        {c:'#00ccff',m:'PoE budget: within operational parameters'},
+        {c:'#ff6644',m:'Offline node detected: requires investigation'},
+        {c:'#00ee88',m:'Switch fabric: forwarding tables synchronized'},
+        {c:'#00aaff',m:'RSSI levels: good across all coverage zones'}
+      ];
+      setInterval(function() {
+        var log = document.getElementById('modern-signal-log');
+        if (!log || log.offsetParent === null) return;
+        var e = sigEntries[Math.floor(Math.random()*sigEntries.length)];
+        var div = document.createElement('div');
+        div.style.color = e.c;
+        div.style.marginBottom = '4px';
+        div.textContent = '[' + new Date().toLocaleTimeString('en-GB') + '] ' + e.m;
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+        if (log.children.length > 40) log.removeChild(log.firstChild);
+      }, 2500);
+    }
+
+    function modernIpLookup() {
+      var ip = document.getElementById('modern-ip-input').value.trim();
+      var result = document.getElementById('modern-ip-result');
+      if (!ip) { result.innerHTML = '<div style="color:#ff6644;font-size:11px">Enter an IP address</div>'; return; }
+      result.innerHTML = '<div style="color:#00aaff;font-size:11px">Analyzing ' + ip + '...</div>';
+      fetch('/threats/api/intel/check/' + ip).then(function(r){return r.json()}).then(function(data) {
+        if (data.error) { result.innerHTML = '<div style="color:#ff6644;font-size:12px">' + data.error + '</div>'; return; }
+        var riskCol = data.risk_classification==='critical'?'#ff4444':data.risk_classification==='high'?'#ff6644':data.risk_classification==='medium'?'#ffaa00':'#00ee88';
+        result.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">' +
+          '<div style="background:rgba(0,60,120,.08);border:1px solid rgba(0,150,255,.1);border-radius:8px;padding:15px"><div style="font-size:9px;letter-spacing:2px;color:rgba(192,216,240,.3);margin-bottom:5px">RISK SCORE</div><div style="font-size:28px;font-weight:700;color:' + riskCol + '">' + (data.abuse_confidence_score||0) + '%</div></div>' +
+          '<div style="background:rgba(0,60,120,.08);border:1px solid rgba(0,150,255,.1);border-radius:8px;padding:15px"><div style="font-size:9px;letter-spacing:2px;color:rgba(192,216,240,.3);margin-bottom:5px">ISP</div><div style="font-size:12px;color:#fff">' + (data.isp||'Unknown') + '</div></div>' +
+          '<div style="background:rgba(0,60,120,.08);border:1px solid rgba(0,150,255,.1);border-radius:8px;padding:15px"><div style="font-size:9px;letter-spacing:2px;color:rgba(192,216,240,.3);margin-bottom:5px">CLASSIFICATION</div><div style="font-size:14px;font-weight:700;color:' + riskCol + ';text-transform:uppercase">' + (data.risk_classification||'unknown') + '</div></div></div>';
+      }).catch(function(e) { result.innerHTML = '<div style="color:#ff6644;font-size:11px">API error: Configure AbuseIPDB key in .env</div>'; });
     }
 
     function closeModern() {
